@@ -1,0 +1,83 @@
+from django.db import models
+from django.utils import timezone
+
+
+class Owner(models.Model): #владелец
+    owner_type = models.CharField(max_length=20)
+    name = models.CharField(max_length=20)
+    INN = models.IntegerField()
+
+
+class Leasing(models.Model): #лизинг
+    name = models.CharField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    amount = models.IntegerField()
+
+
+class CarType(models.Model):
+    name = models.CharField(max_length=100)
+
+
+class Car(models.Model): #техника
+    name = models.CharField(max_length=100)
+    car_type = models.ForeignKey(CarType, on_delete=models.CASCADE)
+    model = models.CharField(max_length=100)
+    number = models.CharField(max_length=9)
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField()
+    price = models.IntegerField()
+    owner = models.ForeignKey(Owner)
+    fuel_consumption = models.DecimalField(max_digits=10, decimal_places=2)
+    leasing = models.BooleanField(default=False)
+
+
+class YRClient(models.Model):  #юр лицо - клиент
+    full_name = models.CharField(max_length=100)
+    documents = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
+    black_list = models.BooleanField(default=False)
+    representative = models.ForeignKey()
+    # Дополнительные поля
+
+
+class Representative(models.Model):   #физ лицо/представитель юр лица
+    full_name = models.CharField(max_length=100)
+    company = models.ForeignKey(YRClient, related_name='full_name')
+    INN = models.IntegerField(max_digits=20)
+    black_list = models.BooleanField(default=False)
+    passport = models.CharField()
+
+
+class Worker(models.model): #рабочий-оператор
+    full_name = models.CharField()
+    mobile_numer = models.CharField()
+    hourly_rate = models.DecimalField(max_digits=10, decimal_places=2)
+    passport = models.CharField()
+
+
+class ConstructionObject(models.Model): #объект стройки
+    name = models.CharField(max_length=100)
+    client = models.ForeignKey('Client', on_delete=models.CASCADE, related_name='construction_objects')
+
+
+class Shift(models.Model): #смена
+    date = models.DateField()
+    worker = models.ForeignKey(Worker)
+    fuel_filled = models.DecimalField(max_digits=10, decimal_places=2)
+    fuel_consumed = models.DecimalField(max_digits=10, decimal_places=2)
+    rental = models.ForeignKey('Rental', on_delete=models.CASCADE, related_name='shifts')
+
+
+class Rental(models.Model): #аренда
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    car = models.ForeignKey(Car, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    # Дополнительные поля
+
+
+# class Accounting(models.Model): #
+#     date = models.DateField()
+#     amount = models.DecimalField(max_digits=10, decimal_places=2)
+#     # Дополнительные поля
