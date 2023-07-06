@@ -18,10 +18,12 @@ class Leasing(models.Model): #лизинг
 class CarType(models.Model):
     name = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.name
+
 
 class Car(models.Model): #техника
     name = models.CharField(max_length=100)
-    car_type = models.ForeignKey(CarType, on_delete=models.CASCADE)
     model = models.CharField(max_length=100)
     number = models.CharField(max_length=9)
     start_date = models.DateField(default=timezone.now)
@@ -30,6 +32,18 @@ class Car(models.Model): #техника
     owner = models.ForeignKey(Owner)
     fuel_consumption = models.DecimalField(max_digits=10, decimal_places=2)
     leasing = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.car_type.name} - {self.id}"
+
+    @staticmethod
+    def get_car_choices():
+        return [(type_obj.id, type_obj.name) for type_obj in CarType.objects.all()]
+
+    @classmethod
+    def get_car_choices(cls):
+        return [(type_obj.id, type_obj.name) for type_obj in
+                cls._meta.get_field('car_type').remote_field.model.objects.all()]
 
 
 class YRClient(models.Model):  #юр лицо - клиент
