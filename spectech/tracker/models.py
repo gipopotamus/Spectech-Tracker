@@ -51,6 +51,7 @@ class Car(models.Model):  # техника
     owner = models.ForeignKey(Owner, verbose_name='владелец', on_delete=models.CASCADE)
     fuel_consumption = models.DecimalField('расход топлива', max_digits=10, decimal_places=2)
     leasing = models.BooleanField('лизинг', default=False)
+    car_type = models.ForeignKey(CarType, verbose_name='тип техники', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Технику'
@@ -74,7 +75,8 @@ class YRClient(models.Model):  # юр лицо - клиент
     documents = models.CharField('документы', max_length=100)
     address = models.CharField('адрес', max_length=100)
     black_list = models.BooleanField('в черном списке', default=False)
-    representative = models.ForeignKey('representative', verbose_name='представитель', on_delete=models.CASCADE)
+    representative = models.ForeignKey('representative', verbose_name='представитель', on_delete=models.CASCADE,
+                                       null=True, blank=True)
     # Дополнительные поля
 
     class Meta:
@@ -85,7 +87,7 @@ class YRClient(models.Model):  # юр лицо - клиент
 class Representative(models.Model):  # физ лицо/представитель юр лица
     full_name = models.CharField('имя', max_length=100)
     company = models.ForeignKey(YRClient, verbose_name='компания', related_name='Representative_name',
-                                on_delete=models.CASCADE)
+                                on_delete=models.CASCADE, null=True, blank=True)
     INN = models.IntegerField('ИНН')
     black_list = models.BooleanField('в черном списке', default=False)
     passport = models.CharField('паспорт', max_length=50)

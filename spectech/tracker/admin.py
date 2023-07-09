@@ -5,8 +5,8 @@ from .models import Owner, Leasing, CarType, Car, YRClient, Representative, Work
 class CarInline(admin.TabularInline):
     model = Car
     extra = 0
-    readonly_fields = ['name', 'model', 'number', 'start_date', 'end_date', 'price', 'owner', 'fuel_consumption',
-                       'leasing']
+    readonly_fields = ['name', 'model', 'car_type', 'number', 'start_date', 'end_date', 'price', 'owner',
+                       'fuel_consumption', 'leasing']
     collapse = True
     can_delete = False
 
@@ -28,13 +28,13 @@ class CarTypeAdmin(admin.ModelAdmin):
 
 
 class CarAdmin(admin.ModelAdmin):
-    list_display = ['name', 'model', 'number', 'start_date', 'end_date', 'price', 'owner', 'leasing']
+    list_display = ['name', 'model', 'car_type', 'number', 'start_date', 'end_date', 'price', 'owner', 'leasing']
     list_filter = ['leasing']
-    search_fields = ['name', 'model', 'number']
+    search_fields = ['name', 'model', 'number', 'car_type']
     autocomplete_fields = ['owner']
     readonly_fields = ['start_date']
     fieldsets = [
-        (None, {'fields': ['name', 'model', 'number']}),
+        (None, {'fields': ['name', 'model', 'number', 'car_type']}),
         ('Dates', {'fields': ['start_date', 'end_date']}),
         ('Details', {'fields': ['price', 'owner', 'fuel_consumption', 'leasing']}),
     ]
