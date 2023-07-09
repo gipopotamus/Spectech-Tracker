@@ -9,7 +9,6 @@ class CarInline(admin.TabularInline):
                        'leasing']
     collapse = True
     can_delete = False
-    show_change_link = True
 
 
 class OwnerAdmin(admin.ModelAdmin):

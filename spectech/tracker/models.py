@@ -1,6 +1,9 @@
 from django.db import models
 from django.utils import timezone
+
+
 #TODO: update models, add documents
+
 
 class Owner(models.Model):  # владелец
     owner_type = models.CharField('тип владельца', max_length=20)
@@ -29,6 +32,11 @@ class Leasing(models.Model):  # лизинг
 class CarType(models.Model):
     name = models.CharField('наименование', max_length=100)
 
+    class Meta:
+        verbose_name = 'Тип техники'
+        verbose_name_plural = 'Тип техники'
+
+
     def __str__(self):
         return self.name
 
@@ -51,14 +59,14 @@ class Car(models.Model):  # техника
     def __str__(self):
         return f"{self.car_type.name} - {self.id}"
 
-    @staticmethod
-    def get_car_choices():
-        return [(type_obj.id, type_obj.name) for type_obj in CarType.objects.all()]
-
-    @classmethod
-    def get_car_choices(cls):
-        return [(type_obj.id, type_obj.name) for type_obj in
-                cls._meta.get_field('car_type').remote_field.model.objects.all()]
+    # @staticmethod
+    # def get_car_choices():
+    #     return [(type_obj.id, type_obj.name) for type_obj in CarType.objects.all()]
+    #
+    # @classmethod
+    # def get_car_choices(cls):
+    #     return [(type_obj.id, type_obj.name) for type_obj in
+    #             cls._meta.get_field('car_type').remote_field.model.objects.all()]
 
 
 class YRClient(models.Model):  # юр лицо - клиент
