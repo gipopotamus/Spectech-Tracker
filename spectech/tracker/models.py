@@ -83,6 +83,9 @@ class YRClient(models.Model):  # юр лицо - клиент
         verbose_name = 'Юр.Лицо'
         verbose_name_plural = 'Юр.Лица'
 
+    def __str__(self):
+        return self.full_name
+
 
 class Representative(models.Model):  # физ лицо/представитель юр лица
     full_name = models.CharField('имя', max_length=100)
@@ -140,6 +143,10 @@ class Rental(models.Model):  # аренда
     class Meta:
         verbose_name = 'Аренду'
         verbose_name_plural = 'Аренды'
+
+    def __str__(self):
+        return f'{self.start_date},{self.end_date}'
+
 
 # class Accounting(models.Model): #
 #     date = models.DateField()
