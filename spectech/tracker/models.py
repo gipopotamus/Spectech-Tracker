@@ -3,6 +3,7 @@ from django.utils import timezone
 
 
 #TODO: update models, add documents
+from django_redis import get_redis_connection
 
 
 class Owner(models.Model):  # владелец
@@ -147,6 +148,17 @@ class Rental(models.Model):  # аренда
     def __str__(self):
         return f'{self.start_date},{self.end_date}'
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.clear_cache()
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.clear_cache()
+
+    def clear_cache(self):
+        redis_conn = get_redis_connection()
+        redis_conn.delete('rental_calendar')
 
 # class Accounting(models.Model): #
 #     date = models.DateField()

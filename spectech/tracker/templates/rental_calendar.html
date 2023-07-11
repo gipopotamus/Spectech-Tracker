@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rental Calendar</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+        th {
+            background-color: lightgray;
+        }
+        .booked {
+            background-color: red;
+            cursor: pointer; /* Изменение формы курсора при наведении */
+        }
+    </style>
+</head>
+<body>
+    <h1>Rental Calendar</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Car</th>
+                {% for date in dates %}
+                    <th>{{ date }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for car_name, rentals in booked_dates.items %}
+            <tr>
+                <td>{{ car_name }}</td>
+                {% for date in dates %}
+                    {% if date in rentals|join:", " %}
+                    <td class="booked">
+                        {% for rental in rentals %}
+                        {% for key, value in rental.items %}
+                                    {% if date in value %}
+                                        {{ key }}
+                                    {% endif %}
+                                {% endfor %}
+                        {% endfor %}
+                    </td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+
+

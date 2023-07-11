@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django_redis import get_redis_connection
+
 from .models import Owner, Leasing, CarType, Car, YRClient, Representative, Worker, ConstructionObject, Shift, Rental
 
 
@@ -86,6 +88,14 @@ class RentalAdmin(admin.ModelAdmin):
     list_display = ['client', 'car', 'start_date', 'end_date']
     search_fields = ['start_date']
     autocomplete_fields = ['client', 'car']
+
+    def delete_queryset(self, request, queryset):
+        queryset.delete()
+        self.clear_cache()
+
+    def clear_cache(self):
+        redis_conn = get_redis_connection()
+        redis_conn.delete('rental_calendar')
 
 
 admin.site.register(Owner, OwnerAdmin)
