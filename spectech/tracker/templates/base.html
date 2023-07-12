@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Мое приложение</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: #343a40;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-nav .nav-item .nav-link {
+            color: #fff;
+        }
+        .navbar-nav .nav-item .nav-link:hover,
+        .navbar-nav .nav-item .nav-link:focus {
+            background-color: #007bff;
+        }
+        .navbar-nav .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        .container {
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .btn {
+            margin-left: 10px;
+        }
+        .ml-auto {
+            margin-left: auto !important;
+        }
+        .dropdown-menu {
+            background-color: #343a40;
+        }
+        .dropdown-item {
+            color: #fff;
+        }
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#">Мое приложение</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Календарь</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    Кнопка 1
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown1">
+                    <a class="dropdown-item" href="#">4</a>
+                    <a class="dropdown-item" href="#">5</a>
+                    <a class="dropdown-item" href="#">6</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    Кнопка 2
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
+                    <a class="dropdown-item" href="#">1</a>
+                    <a class="dropdown-item" href="#">2</a>
+                    <a class="dropdown-item" href="#">3</a>
+                </div>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Логин</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Регистрация</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="container">
+    {% block content %}
+    {% endblock %}
+</div>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+

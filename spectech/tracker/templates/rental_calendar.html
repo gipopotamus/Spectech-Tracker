@@ -1,60 +1,49 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Rental Calendar</title>
-    <style>
-        table {
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 5px;
-        }
-        th {
-            background-color: lightgray;
-        }
-        .booked {
-            background-color: red;
-            cursor: pointer; /* Изменение формы курсора при наведении */
-        }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
     <h1>Rental Calendar</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Car</th>
-                {% for date in dates %}
-                    <th>{{ date }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for car_name, rentals in booked_dates.items %}
-            <tr>
-                <td>{{ car_name }}</td>
-                {% for date in dates %}
-                    {% if date in rentals|join:", " %}
-                    <td class="booked">
-                        {% for rental in rentals %}
-                        {% for key, value in rental.items %}
+    <div id="calendar-container" style="overflow-x: scroll;">
+        <table class="table table-bordered table-striped" style="min-width: 100%; table-layout: fixed;">
+            <thead>
+                <tr>
+                    <th style="width: 100px;">Car</th>
+                    {% for date in dates %}
+                        <th style="width: 100px;">{{ date }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for car_name, rentals in booked_dates.items %}
+                <tr>
+                    <td style="width: 100px;">{{ car_name }}</td>
+                    {% for date in dates %}
+                        {% if date in rentals|join:", " %}
+                        <td class="booked" style="width: 100px; background-color: red; color: white;">
+                            {% for rental in rentals %}
+                                {% for key, value in rental.items %}
                                     {% if date in value %}
-                                        {{ key }}
+                                        <a href="/rental/info/{{ key }}">{{ key }}</a>
                                     {% endif %}
                                 {% endfor %}
-                        {% endfor %}
-                    </td>
-                    {% else %}
-                    <td></td>
-                    {% endif %}
+                            {% endfor %}
+                        </td>
+                        {% else %}
+                        <td style="width: 100px;"></td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+            </tbody>
+        </table>
+    </div>
 
-
+    <div id="create-rental-form" style="margin-top: 20px;">
+        <h2>Create Rental</h2>
+        <form method="post" action="/rental/create/">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+{% endblock %}
