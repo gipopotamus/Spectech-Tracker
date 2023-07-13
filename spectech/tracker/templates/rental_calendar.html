@@ -23,7 +23,8 @@
                             {% for rental in rentals %}
                                 {% for key, value in rental.items %}
                                     {% if date in value %}
-                                        <a href="/rental/info/{{ key }}">{{ key }}</a>
+                                        <a href="{% url 'rental_detail' key %}">{{ key }}</a>
+                                        <a href="{% url 'rental_delete' key %}" class="delete-rental">Delete</a>
                                     {% endif %}
                                 {% endfor %}
                             {% endfor %}
@@ -40,10 +41,40 @@
 
     <div id="create-rental-form" style="margin-top: 20px;">
         <h2>Create Rental</h2>
-        <form method="post" action="/rental/create/">
+        <form method="post" action="{% url 'rental_create' %}">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit" class="btn btn-primary">Create</button>
         </form>
     </div>
+
+    <script>
+        // Обработчик события для удаления аренды
+        const deleteLinks = document.getElementsByClassName('delete-rental');
+        for (const link of deleteLinks) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (confirm('Are you sure you want to delete this rental?')) {
+                    const url = this.getAttribute('href');
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();  // Перезагрузка страницы после успешного удаления
+                        } else {
+                            console.error('Error occurred during rental deletion');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error occurred during rental deletion:', error);
+                    });
+                }
+            });
+        }
+    </script>
 {% endblock %}

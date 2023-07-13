@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import rental_calendar, RentalDetailView
+from .views import RentalCalendarView, RentalDetailView, RentalDeleteView
 
 urlpatterns = [
-    path('calendar/', rental_calendar, name='rental_calendar'),
-    path('info/<int:pk>/', RentalDetailView.as_view(), name='booking_delete'),
-    path('create/', rental_calendar, name='create_rental'),
+    path('calendar/', RentalCalendarView.as_view(), name='rental_calendar'),
+    path('info/<int:pk>/', RentalDetailView.as_view(), name='rental_detail'),
+    path('create/', RentalCalendarView.as_view(), name='rental_create'),
+    path('delete/<int:pk>/', RentalDeleteView.as_view(), name='rental_delete')
 ]
 
