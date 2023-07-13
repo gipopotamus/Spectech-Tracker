@@ -1,19 +1,14 @@
-from django.utils import timezone
 import json
 from datetime import timedelta
 
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
-from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django_redis import get_redis_connection
-
 from .forms import RentalForm
-from .models import Car
-from .models import Rental
+from .models import Car, Rental
 
 
 class RentalCalendarView(View):
