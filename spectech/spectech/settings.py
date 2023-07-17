@@ -70,6 +70,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'spectech.wsgi.application'
+LOGIN_REDIRECT_URL = 'rental_calendar'
 
 
 # Database

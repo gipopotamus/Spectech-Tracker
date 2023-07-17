@@ -1,9 +1,10 @@
 import json
 from datetime import timedelta
 
+from django.contrib.auth.views import LoginView
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.views.generic import DetailView, ListView
@@ -129,3 +130,13 @@ class CarDetailView(DetailView):
     model = Car
     template_name = 'lists/car_detail.html'
     context_object_name = 'car'
+
+
+class CustomLoginView(LoginView):
+    template_name = 'login.html'
+    success_url = reverse_lazy('rental_calendar')  # Замените 'car_list' на URL вашей страницы после успешного входа
+
+    def get(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            return redirect(self.success_url)
+        return super().get(request, *args, **kwargs)

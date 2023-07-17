@@ -17,9 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from tracker.views import CustomLoginView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('rental/', include('tracker.urls')),
+    path('login/', CustomLoginView.as_view())
 ]
 
