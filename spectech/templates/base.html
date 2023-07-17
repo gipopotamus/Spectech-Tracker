@@ -1,56 +1,17 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Мое приложение</title>
+    <title>SpecTech</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .navbar {
-            background-color: #343a40;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .navbar-nav .nav-item .nav-link {
-            color: #fff;
-        }
-        .navbar-nav .nav-item .nav-link:hover,
-        .navbar-nav .nav-item .nav-link:focus {
-            background-color: #007bff;
-        }
-        .navbar-nav .dropdown:hover .dropdown-menu {
-            display: block;
-        }
-        .container {
-            margin-top: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
-        .btn {
-            margin-left: 10px;
-        }
-        .ml-auto {
-            margin-left: auto !important;
-        }
-        .dropdown-menu {
-            background-color: #343a40;
-        }
-        .dropdown-item {
-            color: #fff;
-        }
-        .dropdown-item:hover,
-        .dropdown-item:focus {
-            background-color: #007bff;
-        }
-    </style>
+
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark">
-    <a class="navbar-brand" href="#">Мое приложение</a>
+    <a class="navbar-brand" href="#">SpecTech</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -58,17 +19,17 @@
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link" href="#">Календарь</a>
+                <a class="nav-link" href="{% url 'rental_calendar'%}">Календарь</a>
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
-                    Кнопка 1
+                    Списки
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown1">
-                    <a class="dropdown-item" href="#">4</a>
-                    <a class="dropdown-item" href="#">5</a>
-                    <a class="dropdown-item" href="#">6</a>
+                    <a class="dropdown-item" href="{% url 'car_list'%}">Техника</a>
+                    <a class="dropdown-item" href="#">Клиенты</a>
+                    <a class="dropdown-item" href="#"></a>
                 </div>
             </li>
             <li class="nav-item dropdown">
@@ -77,7 +38,7 @@
                     Кнопка 2
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
-                    <a class="dropdown-item" href="#">1</a>
+                    <a class="dropdown-item" href="rental/list/cars">1</a>
                     <a class="dropdown-item" href="#">2</a>
                     <a class="dropdown-item" href="#">3</a>
                 </div>
@@ -97,6 +58,7 @@
     {% block content %}
     {% endblock %}
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

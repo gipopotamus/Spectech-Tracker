@@ -79,9 +79,9 @@ class ConstructionObjectAdmin(admin.ModelAdmin):
 
 
 class ShiftAdmin(admin.ModelAdmin):
-    list_display = ['date', 'worker', 'fuel_filled', 'fuel_consumed', 'rental']
-    search_fields = ['date']
-    autocomplete_fields = ['worker', 'rental']
+    list_display = ['worker', 'fuel_filled', 'fuel_consumed']
+    # search_fields = ['date']
+    autocomplete_fields = ['worker']
 
 
 class RentalAdmin(admin.ModelAdmin):

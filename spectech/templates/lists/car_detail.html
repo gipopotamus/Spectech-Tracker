@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Информация о машине</h3>
+      </div>
+      <div class="card-body">
+        <table class="table">
+          <tbody>
+            <tr>
+              <th>Наименование:</th>
+              <td>{{ car.name }}</td>
+            </tr>
+            <tr>
+              <th>Модель:</th>
+              <td>{{ car.model }}</td>
+            </tr>
+            <tr>
+              <th>Номер:</th>
+              <td>{{ car.number }}</td>
+            </tr>
+            <!-- Добавьте остальные общие поля машины здесь -->
+          </tbody>
+        </table>
+        <!-- Добавление аккордеонов для каждой категории информации -->
+        <div class="accordion mt-3" id="carInfoAccordion">
+          <!-- Топливо -->
+          <div class="card">
+            <div class="card-header" id="fuelHeading">
+              <h5 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#fuelCollapse" aria-expanded="true" aria-controls="fuelCollapse">
+                  Топливо
+                </button>
+              </h5>
+            </div>
+
+            <div id="fuelCollapse" class="collapse" aria-labelledby="fuelHeading" data-parent="#carInfoAccordion">
+              <div class="card-body">
+                <p><strong>Заправленное топливо:</strong> {{ car.fuel_filled }}</p>
+                <p><strong>Расход топлива:</strong> {{ car.fuel_consumption }}</p>
+                <!-- Дополнительные поля для топлива здесь -->
+              </div>
+            </div>
+          </div>
+          <!-- Страховки -->
+          <div class="card">
+            <div class="card-header" id="insuranceHeading">
+              <h5 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#insuranceCollapse" aria-expanded="true" aria-controls="insuranceCollapse">
+                  Страховки
+                </button>
+              </h5>
+            </div>
+
+            <div id="insuranceCollapse" class="collapse" aria-labelledby="insuranceHeading" data-parent="#carInfoAccordion">
+              <div class="card-body">
+                <!-- Добавить поля для страховок здесь -->
+              </div>
+            </div>
+          </div>
+          <!-- Тех.информация -->
+          <div class="card">
+            <div class="card-header" id="technicalHeading">
+              <h5 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#technicalCollapse" aria-expanded="true" aria-controls="technicalCollapse">
+                  Тех.информация
+                </button>
+              </h5>
+            </div>
+
+            <div id="technicalCollapse" class="collapse" aria-labelledby="technicalHeading" data-parent="#carInfoAccordion">
+              <div class="card-body">
+                <!-- Добавить поля для тех.информации здесь -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-3">
+      <a href="{% url 'car_list' %}" class="btn btn-secondary">Назад к списку машин</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
