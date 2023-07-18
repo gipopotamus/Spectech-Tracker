@@ -125,31 +125,11 @@ class ConstructionObject(models.Model):  # объект стройки
         verbose_name_plural = 'Объекты'
 
 
-class Shift(models.Model):  # смена
-    worker = models.ForeignKey(Worker, verbose_name='рабочий', on_delete=models.CASCADE)
-    fuel_filled = models.DecimalField('заправленное топливо', max_digits=10, decimal_places=2)
-    fuel_consumed = models.DecimalField('расход топлива', max_digits=10, decimal_places=2)
-    start_date = models.DateField()
-    end_date = models.DateField()
-
-    def total_salary(self):
-        days = (self.end_date - self.start_date).days + 1
-        return self.worker.hourly_rate * days
-
-    def __str__(self):
-        return f" Смена {self.worker}"
-
-    class Meta:
-        verbose_name = 'Смену'
-        verbose_name_plural = 'Смены'
-
-
 class Rental(models.Model):  # аренда
     client = models.ForeignKey(YRClient, verbose_name='клиент', on_delete=models.CASCADE)
     car = models.ForeignKey(Car, verbose_name='техника', on_delete=models.CASCADE)
     start_date = models.DateField('дата начала')
     end_date = models.DateField('дата окончания')
-    shifts = models.ManyToManyField(Shift)
     # Дополнительные поля
 
     class Meta:
@@ -170,6 +150,22 @@ class Rental(models.Model):  # аренда
     def clear_cache(self):
         redis_conn = get_redis_connection()
         redis_conn.delete('rental_calendar')
+
+
+class Shift(models.Model):  # смена
+    worker = models.ForeignKey(Worker, verbose_name='рабочий', on_delete=models.CASCADE)
+    fuel_filled = models.DecimalField('заправленное топливо', max_digits=10, decimal_places=2)
+    fuel_consumed = models.DecimalField('расход топлива', max_digits=10, decimal_places=2)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    rental = models.ForeignKey(Rental, related_name='shifts', verbose_name='аренда', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f" Смена {self.worker}"
+
+    class Meta:
+        verbose_name = 'Смену'
+        verbose_name_plural = 'Смены'
 
 
 # class Accounting(models.Model): #
