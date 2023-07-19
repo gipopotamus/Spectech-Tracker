@@ -22,6 +22,6 @@ from tracker.views import CustomLoginView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('rental/', include('tracker.urls')),
-    path('login/', CustomLoginView.as_view())
+    path('login/', CustomLoginView.as_view(), name='login')
 ]
 

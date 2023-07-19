@@ -1,14 +1,15 @@
 import json
-from datetime import timedelta
-
+from django.db import models
 from django.contrib.auth.views import LoginView
-from django.db.models import Sum, F
+from django.db.models import Sum, F, ExpressionWrapper, FloatField
+from django.db.models.functions import ExtractHour
 from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.datetime_safe import datetime
 from django.views import View
-from django.views.generic import DetailView, ListView, FormView, CreateView
+from django.views.generic import DetailView, ListView, CreateView
 from django_redis import get_redis_connection
 from .forms import RentalForm, ShiftForm
 from .models import Car, Rental, YRClient, Shift
@@ -44,7 +45,6 @@ class RentalCalendarView(View):
                                  range((rental.end_date - rental.start_date).days + 1))]
                 }
 
-
                 booked_dates[car_name].append(rental_data)
 
             redis_conn.set('rental_calendar', json.dumps(booked_dates), ex=86400)
@@ -57,7 +57,7 @@ class RentalCalendarView(View):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()
-        print(context)
+
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -100,7 +100,16 @@ class RentalDetailView(DetailView):
         rental = self.get_object()
 
         # Рассчитываем общую оплату за каждую смену
-        shifts = rental.shifts.annotate(total_payment=F('worker__hourly_rate') * 8)
+        shifts = rental.shifts.annotate(
+            total_hours=ExpressionWrapper(
+                ExtractHour(F('end_time') - F('start_time')),
+                output_field=FloatField()  # Используем FloatField для временной разницы
+            ),
+            total_payment=ExpressionWrapper(
+                ExtractHour(F('end_time') - F('start_time')) * F('worker__hourly_rate'),
+                output_field=FloatField()  # Используем FloatField для оплаты смены
+            )
+        )
 
         # Рассчитываем общую сумму оплаты за все смены
         total_salary = shifts.aggregate(total_salary=Sum('total_payment'))['total_salary'] or 0
@@ -115,6 +124,12 @@ class RentalDetailView(DetailView):
         if shift_form.is_valid():
             shift_form.save()
         return redirect('rental_info', pk=self.object.pk)
+
+
+class RentalListView(ListView):
+    model = Rental
+    template_name = 'lists/rentals.html'
+    context_object_name = 'clients'
 
 
 class ShiftCreateView(CreateView):
@@ -139,7 +154,6 @@ class ShiftCreateView(CreateView):
         return kwargs
 
 
-
 class CarListView(ListView):
     model = Car
     template_name = 'lists/cars.html'
@@ -152,10 +166,18 @@ class CarListView(ListView):
             return Car.objects.all()
 
     def get_context_data(self, **kwargs):
+        current_month = datetime.now().month
         context = super().get_context_data(**kwargs)
         cars = context['object_list']
         for car in cars:
             car.url = reverse('car_detail', args=[car.pk])
+            shifts_this_month = Shift.objects.filter(rental__car=car, date__month=current_month)
+            # Рассчитываем общее количество отработанных часов за текущий месяц для данной машины
+            total_worked_hours = shifts_this_month.aggregate(
+                total=Sum(ExpressionWrapper(F('end_time') - F('start_time'), output_field=models.DurationField()))
+            )['total']
+            # Преобразуем общее количество отработанных часов в число часов
+            car.worked_hours_this_month = total_worked_hours.total_seconds() // 3600 if total_worked_hours else 0
         return context
 
 

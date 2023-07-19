@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow animate__animated animate__fadeInDown">
+        <div class="card-header bg-primary text-white">
+          <h3 class="card-title">Вход</h3>
+        </div>
+        <div class="card-body">
+          <form method="post" class="d-flex flex-column align-items-center" id="loginForm">
+            {% csrf_token %}
+            <div class="form-group w-100">
+              <label for="{{ form.username.id_for_label }}">Логин</label>
+              {{ form.username }}
+            </div>
+            <div class="form-group w-100">
+              <label for="{{ form.password.id_for_label }}">Пароль</label>
+              {{ form.password }}
+            </div>
+            <button type="submit" class="btn btn-primary">Войти</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Подключаем библиотеку animate.css -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loginForm');
+    form.classList.add('animate__animated', 'animate__fadeInDown');
+  });
+</script>
+{% endblock %}

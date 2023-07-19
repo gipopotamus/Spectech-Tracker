@@ -156,12 +156,13 @@ class Shift(models.Model):  # смена
     worker = models.ForeignKey(Worker, verbose_name='рабочий', on_delete=models.CASCADE)
     fuel_filled = models.DecimalField('заправленное топливо', max_digits=10, decimal_places=2)
     fuel_consumed = models.DecimalField('расход топлива', max_digits=10, decimal_places=2)
-    start_date = models.DateField()
-    end_date = models.DateField()
+    date = models.DateField(default=timezone.now())  # Добавляем поле даты
+    start_time = models.TimeField(verbose_name='время начала')  # Поле времени начала
+    end_time = models.TimeField(verbose_name='время окончания')  # Поле времени окончания
     rental = models.ForeignKey(Rental, related_name='shifts', verbose_name='аренда', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f" Смена {self.worker}"
+        return f"Смена {self.worker}"
 
     class Meta:
         verbose_name = 'Смену'

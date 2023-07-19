@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="table-responsive">
+    <h2>Список автомобилей</h2>
+    <table class="table">
+      <!-- ... (предыдущий код шаблона остается неизменным) ... -->
+<thead>
+  <tr>
+    <th>Наименование</th>
+    <th>Тип техники</th>
+    <th>Модель</th>
+    <th>Цена</th>
+    <th>Отработанные часы (за текущий месяц)</th>
+    <th>Владелец</th>
+  </tr>
+</thead>
+<tbody>
+  {% for car in object_list %}
+    <tr onclick="window.location.href='{{ car.url }}';" style="cursor: pointer;">
+      <td>{{ car.name }}</td>
+      <td>{{ car.car_type }}</td>
+      <td>{{ car.model }}</td>
+      <td>{{ car.price }}</td>
+      <td>{{ car.worked_hours_this_month }}</td>
+      <td>{{ car.owner }}</td>
+    </tr>
+  {% endfor %}
+</tbody>
+<!-- ... (оставшийся код шаблона остается неизменным) ... -->
+
+    </table>
+  </div>
+{% endblock %}
