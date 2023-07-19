@@ -1,27 +1,79 @@
-{% extends 'base.html' %}
+  {% extends 'base.html' %}
 
-{% block content %}
-<div class="table-responsive">
-  <h2>Список клиентов</h2>
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Имя</th>
-        <th>Фамилия</th>
-        <th>Email</th>
-        <th>Телефон</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for rental in rentals %}
+  {% block content %}
+  <div class="table-responsive">
+    <h2>Список активных аренд</h2>
+    <table class="table">
+      <thead>
         <tr>
-          <td>{{ rental.client }}</td>
-          <td>{{ rental.car }}</td>
-          <td>{{ rental.full_name }}</td>
-          <td>{{ client.full_name }}</td>
+          <th>Клиент</th>
+          <th>Даты</th>
+          <th>Техника</th>
+          <th>Статус</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endblock %}
+      </thead>
+      <tbody>
+        {% for rental in active_rentals %}
+          <tr>
+            <td>{{ rental.client.full_name }}</td>
+            <td>{{ rental.start_date }} - {{ rental.end_date }}</td>
+            <td>{{ rental.car }}</td>
+            <td><span class="status-active">Активная</span></td>
+          </tr>
+        {% endfor %}
+       {% for rental in upcoming_rentals %}
+          <tr>
+            <td>{{ rental.client.full_name }}</td>
+            <td>{{ rental.start_date }} - {{ rental.end_date }}</td>
+            <td>{{ rental.car }}</td>
+            <td><span class="status-upcoming">Ожидается</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-responsive">
+    <h2>Список архивных аренд</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Клиент</th>
+          <th>Даты</th>
+          <th>Техника</th>
+          <th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rental in archive_rentals %}
+          <tr class="text-muted">
+            <td>{{ rental.client.full_name }}</td>
+            <td>{{ rental.start_date }} - {{ rental.end_date }}</td>
+            <td>{{ rental.car }}</td>
+            <td>Завершена</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endblock %}
+
+  <style>
+  /* Стили для статуса "Активная" */
+  .status-active {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: green;
+    color: white;
+    border-radius: 20px;
+  }
+
+  /* Стили для статуса "Ожидается" */
+  .status-upcoming {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: yellow;
+    color: black;
+    border-radius: 20px;
+  }
+  </style>

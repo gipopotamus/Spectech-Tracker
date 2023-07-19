@@ -40,9 +40,9 @@ class RentalCalendarView(View):
             for rental in rentals:
                 car_name = rental.car.name
                 rental_data = {
-                    rental.id: [date.strftime('%m-%d') for date in
+                    rental.id: [rental.client.full_name, [date.strftime('%m-%d') for date in
                                 (rental.start_date + timedelta(days=i) for i in
-                                 range((rental.end_date - rental.start_date).days + 1))]
+                                 range((rental.end_date - rental.start_date).days + 1))]]
                 }
 
                 booked_dates[car_name].append(rental_data)
@@ -129,7 +129,16 @@ class RentalDetailView(DetailView):
 class RentalListView(ListView):
     model = Rental
     template_name = 'lists/rentals.html'
-    context_object_name = 'clients'
+    context_object_name = 'rentals'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current_date = timezone.now().date()
+        context['active_rentals'] = Rental.objects.filter(start_date__lte=current_date, end_date__gte=current_date)
+        context['upcoming_rentals'] = Rental.objects.filter(start_date__gt=current_date)
+        context['archive_rentals'] = Rental.objects.filter(end_date__lt=current_date)
+        return context
+
 
 
 class ShiftCreateView(CreateView):

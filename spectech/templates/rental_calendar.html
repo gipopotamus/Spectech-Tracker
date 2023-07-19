@@ -34,8 +34,8 @@
                                 <td class="booked" style="width: 100px; background-color: red; color: white;">
                                     {% for rental in rentals %}
                                         {% for key, value in rental.items %}
-                                            {% if date in value %}
-                                                <a href="{% url 'rental_detail' key %}" class="text-light">{{ key }}</a>
+                                            {% if date in value.1 %}
+                                                <a href="{% url 'rental_detail' key %}" class="text-light">{{ value.0 }}</a>
                                                 <a href="{% url 'rental_delete' key %}" class="delete-rental" style="float: right;">
                                                     <i class="fa fa-trash text-light"></i>
                                                 </a>
