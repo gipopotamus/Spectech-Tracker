@@ -12,7 +12,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView, CreateView
 from django_redis import get_redis_connection
 from .forms import RentalForm, ShiftForm
-from .models import Car, Rental, YRClient, Shift
+from .models import Car, Rental, Shift, Client
 
 from datetime import timedelta
 
@@ -40,7 +40,7 @@ class RentalCalendarView(View):
             for rental in rentals:
                 car_name = rental.car.name
                 rental_data = {
-                    rental.id: [rental.client.full_name, [date.strftime('%m-%d') for date in
+                    rental.id: [rental.client.name, [date.strftime('%m-%d') for date in
                                 (rental.start_date + timedelta(days=i) for i in
                                  range((rental.end_date - rental.start_date).days + 1))]]
                 }
@@ -140,7 +140,6 @@ class RentalListView(ListView):
         return context
 
 
-
 class ShiftCreateView(CreateView):
     model = Shift
     form_class = ShiftForm
@@ -197,7 +196,7 @@ class CarDetailView(DetailView):
 
 
 class ClientListView(ListView):
-    model = YRClient
+    model = Client
     template_name = 'lists/clients.html'
     context_object_name = 'clients'
     paginate_by = 10  # Укажите количество объектов на одной странице

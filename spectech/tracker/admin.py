@@ -1,7 +1,10 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django_redis import get_redis_connection
 
-from .models import Owner, Leasing, CarType, Car, YRClient, Representative, Worker, ConstructionObject, Shift, Rental
+from .models import Owner, Leasing, CarType, Car, Worker, BuildObject, Shift, Rental, Insurance, IndividualClient, \
+    LegalClient, Tariff, Client
 
 
 class CarInline(admin.TabularInline):
@@ -20,13 +23,19 @@ class OwnerAdmin(admin.ModelAdmin):
 
 
 class LeasingAdmin(admin.ModelAdmin):
-    list_display = ['name', 'start_date', 'end_date', 'amount']
-    search_fields = ['name']
+    list_display = ('id', 'bank', 'amount', 'term', 'monthly_payment_date')
+    list_filter = ('term',)
+    search_fields = ('bank', 'amount')
 
 
 class CarTypeAdmin(admin.ModelAdmin):
     list_display = ['name']
     search_fields = ['name']
+
+
+class InsuranceInline(admin.StackedInline):
+    model = Insurance
+    can_delete = False
 
 
 class CarAdmin(admin.ModelAdmin):
@@ -39,31 +48,64 @@ class CarAdmin(admin.ModelAdmin):
         (None, {'fields': ['name', 'model', 'number', 'car_type']}),
         ('Dates', {'fields': ['start_date', 'end_date']}),
         ('Details', {'fields': ['price', 'owner', 'fuel_consumption', 'leasing']}),
+        ('Additional', {
+            'classes': ('collapse',),
+            'fields': [
+                'year_of_manufacture',
+                'vin',
+                'chassis_number',
+                'body_number',
+                'engine_number',
+                'engine_volume',
+                'fuel_type',
+                'fuel_card_number',
+                'inspection_number',
+                'inspection_expiry_date',
+            ],
+        }),
     ]
+    inlines = [InsuranceInline]
 
 
-class YRClientAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'documents', 'address', 'black_list', 'representative']
-    search_fields = ['full_name', 'documents']
-    list_filter = ['black_list']
-    autocomplete_fields = ['representative']
-    readonly_fields = ['black_list']
-    fieldsets = [
-        (None, {'fields': ['full_name', 'documents', 'address']}),
-        ('Status', {'fields': ['black_list', 'representative']}),
-    ]
+class IndividualClientAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+    autocomplete_fields = ['build_object']
 
 
-class RepresentativeAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'company', 'INN', 'black_list', 'passport']
-    search_fields = ['full_name', 'passport']
-    list_filter = ['black_list']
-    autocomplete_fields = ['company']
-    readonly_fields = ['black_list']
-    fieldsets = [
-        (None, {'fields': ['full_name', 'company', 'INN']}),
-        ('Status', {'fields': ['black_list', 'passport']}),
-    ]
+class LegalClientAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+    autocomplete_fields = ['build_object']
+
+
+class ClientAdmin(admin.ModelAdmin):
+    search_fields = ['name']
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        # Получаем объект клиента
+        client = self.get_object(request, object_id)
+
+        # Проверяем тип клиента
+        if isinstance(client, IndividualClient):
+            # Получаем URL для страницы редактирования физического лица
+            url = reverse('admin:%s_%s_change' % (self.model._meta.app_label, 'individualclient'), args=[object_id])
+            return HttpResponseRedirect(url)
+        elif isinstance(client, LegalClient):
+            # Получаем URL для страницы редактирования юридического лица
+            url = reverse('admin:%s_%s_change' % (self.model._meta.app_label, 'legalclient'), args=[object_id])
+            return HttpResponseRedirect(url)
+        else:
+            return super().change_view(request, object_id, form_url, extra_context)
 
 
 class WorkerAdmin(admin.ModelAdmin):
@@ -72,10 +114,9 @@ class WorkerAdmin(admin.ModelAdmin):
     list_filter = ['hourly_rate']
 
 
-class ConstructionObjectAdmin(admin.ModelAdmin):
-    list_display = ['name', 'client']
+class BuildObjectAdmin(admin.ModelAdmin):
+    list_display = ['name']
     search_fields = ['name']
-    autocomplete_fields = ['client']
 
 
 class ShiftAdmin(admin.ModelAdmin):
@@ -84,10 +125,14 @@ class ShiftAdmin(admin.ModelAdmin):
     autocomplete_fields = ['worker']
 
 
+class TariffAdmin(admin.ModelAdmin):
+    search_fields = ['name']  # Добавьте поле для поиска тарифов
+
+
 class RentalAdmin(admin.ModelAdmin):
-    list_display = ['client', 'car', 'start_date', 'end_date']
-    search_fields = ['start_date']
-    autocomplete_fields = ['client', 'car']
+    list_display = ['client', 'car', 'start_date', 'end_date', 'tariff']
+    list_filter = ['start_date', 'end_date']
+    autocomplete_fields = ['client', 'car', 'tariff']
 
     def delete_queryset(self, request, queryset):
         queryset.delete()
@@ -102,9 +147,11 @@ admin.site.register(Owner, OwnerAdmin)
 admin.site.register(Leasing, LeasingAdmin)
 admin.site.register(CarType, CarTypeAdmin)
 admin.site.register(Car, CarAdmin)
-admin.site.register(YRClient, YRClientAdmin)
-admin.site.register(Representative, RepresentativeAdmin)
+admin.site.register(IndividualClient, IndividualClientAdmin)
+admin.site.register(LegalClient, LegalClientAdmin)
 admin.site.register(Worker, WorkerAdmin)
-admin.site.register(ConstructionObject, ConstructionObjectAdmin)
+admin.site.register(BuildObject, BuildObjectAdmin)
 admin.site.register(Shift, ShiftAdmin)
 admin.site.register(Rental, RentalAdmin)
+admin.site.register(Tariff, TariffAdmin)
+admin.site.register(Client, ClientAdmin)
