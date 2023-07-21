@@ -22,6 +22,10 @@
               <th>Номер:</th>
               <td>{{ car.number }}</td>
             </tr>
+            <tr>
+              <th>Цена:</th>
+              <td>{{ car.price }}</td>
+            </tr>
             <!-- Добавьте остальные общие поля машины здесь -->
           </tbody>
         </table>
@@ -39,9 +43,10 @@
 
             <div id="fuelCollapse" class="collapse" aria-labelledby="fuelHeading" data-parent="#carInfoAccordion">
               <div class="card-body">
-                <p><strong>Заправленное топливо:</strong> {{ car.fuel_filled }}</p>
                 <p><strong>Расход топлива:</strong> {{ car.fuel_consumption }}</p>
-                <!-- Дополнительные поля для топлива здесь -->
+                <p><strong>Тип топлива:</strong> {{ car.fuel_type }}</p>
+                <p><strong>Номер топливной карты:</strong> {{ car.fuel_card_number }}</p>
+                <p><strong>Год выпуска:</strong> {{ car.year_of_manufacture }}</p>
               </div>
             </div>
           </div>
@@ -57,23 +62,36 @@
 
             <div id="insuranceCollapse" class="collapse" aria-labelledby="insuranceHeading" data-parent="#carInfoAccordion">
               <div class="card-body">
-                <!-- Добавить поля для страховок здесь -->
+                {% for insurance in insurances %}
+                  <p><strong>Номер ТО:</strong> {{ car.inspection_number }}</p>
+                  <p><strong>Срок действия ТО:</strong> {{ car.inspection_expiry_date }}</p>
+                  <p><strong>Номер ОСАГО:</strong> {{ insurance.osago_number }}</p>
+                  <p><strong>Действует до:</strong> {{ insurance.osago_expiry_date }}</p>
+                  <p><strong>Номер КАСКО:</strong> {{ insurance.kasko_number }}</p>
+                  <p><strong>Действует до:</strong> {{ insurance.kasko_expiry_date }}</p>
+                {% endfor %}
               </div>
             </div>
           </div>
-          <!-- Тех.информация -->
+          <!-- Тех. информация -->
           <div class="card">
             <div class="card-header" id="technicalHeading">
               <h5 class="mb-0">
                 <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#technicalCollapse" aria-expanded="true" aria-controls="technicalCollapse">
-                  Тех.информация
+                  Тех. информация
                 </button>
               </h5>
             </div>
 
             <div id="technicalCollapse" class="collapse" aria-labelledby="technicalHeading" data-parent="#carInfoAccordion">
               <div class="card-body">
-                <!-- Добавить поля для тех.информации здесь -->
+                <!-- Добавить поля для тех. информации здесь -->
+                <p><strong>Номер шасси:</strong> {{ car.chassis_number }}</p>
+                <p><strong>Номер кузова:</strong> {{ car.body_number }}</p>
+                <p><strong>Номер VIN:</strong> {{ car.vin }}</p>
+                <p><strong>Номер двигателя:</strong> {{ car.engine_number }}</p>
+                <p><strong>объем двигателя:</strong> {{ car.engine_volume }}</p>
+                <!-- Добавить другие поля для тех. информации здесь -->
               </div>
             </div>
           </div>
@@ -85,5 +103,6 @@
     </div>
   </div>
 </div>
+
 
 {% endblock %}

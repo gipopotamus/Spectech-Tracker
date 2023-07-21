@@ -194,6 +194,14 @@ class CarDetailView(DetailView):
     template_name = 'lists/car_detail.html'
     context_object_name = 'car'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        car = self.get_object()
+
+        # Получение всех связанных страховок
+        context['insurances'] = car.insurance_set.all()
+        return context
+
 
 class ClientListView(ListView):
     model = Client

@@ -43,7 +43,14 @@ body {
   transform: translateY(0);
 }
 
-
+td.booked {
+  white-space: normal; /* Позволяет тексту переноситься на новую строку */
+  word-wrap: break-word; /* Позволяет автоматически переносить длинные слова на новую строку */
+  height: auto; /* Растягивает ячейку по вертикали, чтобы вместить текст */\
+  width: 100px;
+  background-color: #314D3F;
+  color: white;
+}
 
 
 
