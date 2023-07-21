@@ -15,43 +15,45 @@
             </div>
         </form>
     </div>
-    <div id="calendar-container" style="overflow-x: scroll;">
-        <table class="table table-bordered table-striped" style="min-width: 100%; table-layout: fixed;">
-            <thead>
+<div id="calendar-container" style="overflow-x: scroll;">
+    <table class="table table-bordered table-striped" style="min-width: 100%; table-layout: fixed;">
+        <thead>
+            <tr>
+                <th style="width: 100px;">Car</th>
+                {% for date in dates %}
+                    <th style="width: 100px;">{{ date }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for car_name, rentals in booked_dates.items %}
                 <tr>
-                    <th style="width: 100px;">Car</th>
-                    {% for date in dates %}
-                        <th style="width: 100px;">{{ date }}</th>
+                    <td class="fixed-column">{{ car_name }}</td>
+                    {% for dat in dates %}
+                        {% if dat in rentals|join:", " %}
+                            <td class="booked">
+                                {% for rental in rentals %}
+                                    {% for key, value in rental.items %}
+                                        {% if dat in value.1.0 %}
+                                            <a href="{% url 'rental_detail' key %}" class="text-light">{{ value.0 }}</a>
+                                            <a href="{% url 'rental_delete' key %}" class="delete-rental" style="float: right;">
+                                                <i class="fa fa-trash text-light"></i>
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </td>
+                        {% else %}
+                            <td style="width: 100px;"></td>
+                        {% endif %}
                     {% endfor %}
                 </tr>
-            </thead>
-            <tbody>
-                {% for car_name, rentals in booked_dates.items %}
-                    <tr>
-                        <td style="width: 100px;">{{ car_name }}</td>
-                        {% for dat in dates %}
-                            {% if dat in rentals|join:", " %}
-                                <td class="booked">
-                                    {% for rental in rentals %}
-                                        {% for key, value in rental.items %}
-                                            {% if dat in value.1.0 %}
-                                                <a href="{% url 'rental_detail' key %}" class="text-light">{{ value.0 }}</a>
-                                                <a href="{% url 'rental_delete' key %}" class="delete-rental" style="float: right;">
-                                                    <i class="fa fa-trash text-light"></i>
-                                                </a>
-                                             {% endif %}
-                                        {% endfor %}
-                                    {% endfor %}
-                                </td>
-                            {% else %}
-                                <td style="width: 100px;"></td>
-                            {% endif %}
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
     <div id="create-rental-form" style="margin-top: 20px;">
         <h2>Добавить аренду</h2>
         <form method="post" action="{% url 'rental_create' %}">
@@ -138,4 +140,33 @@
             });
         }
     </script>
+ <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Найдем элемент ленты
+        const calendarContainer = document.getElementById("calendar-container");
+        if (!calendarContainer) {
+            console.error("Элемент #calendar-container не найден.");
+            return;
+        }
+
+        // Получим текущую дату
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth();
+        const currentDay = currentDate.getDate()
+
+        // Найдем элемент с текущей датой внутри ленты
+        const currentDayElement = calendarContainer.querySelector(
+            `th:nth-child(${currentDay - 1})`
+        );
+        if (!currentDayElement) {
+            console.error("Элемент текущего месяца не найден.");
+            return;
+        }
+
+        // Посчитаем ширину элементов до текущего месяца и прокрутим ленту
+        const scrollPosition = currentDayElement.offsetLeft;
+        calendarContainer.scrollLeft = scrollPosition;
+    });
+</script>
 {% endblock %}

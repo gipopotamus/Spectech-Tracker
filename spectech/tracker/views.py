@@ -11,7 +11,7 @@ from django.utils.datetime_safe import datetime
 from django.views import View
 from django.views.generic import DetailView, ListView, CreateView
 from django_redis import get_redis_connection
-
+import calendar as cal
 from .forms import RentalForm, ShiftForm
 from .models import Car, Rental, Shift, Client
 
@@ -35,13 +35,13 @@ class RentalCalendarView(View):
         selected_month = self.request.GET.get('month')
         if selected_month:
             selected_date = timezone.datetime.strptime(selected_month, '%Y-%m').date()
-
         else:
             selected_date = today.replace(day=1)
-        # Получаем первый и последний день выбранного месяца
+
         first_day_of_month, last_day_of_month = self.get_first_and_last_day_of_month(selected_date)
+        num_days_in_month = cal.monthrange(selected_date.year, selected_date.month)[1]
+
         redis_conn = get_redis_connection()
-        # Проверяем кэш на наличие данных для выбранного месяца
         cache_key = f"rental_calendar_{selected_month}"
         calendar = redis_conn.get(cache_key)
 
@@ -53,10 +53,8 @@ class RentalCalendarView(View):
                 end_date__gte=first_day_of_month,
                 start_date__lte=last_day_of_month
             )
-            print(rentals)
             booked_dates = {}
             cars = Car.objects.all()
-
             for car in cars:
                 booked_dates[car.name] = []
 
@@ -73,7 +71,7 @@ class RentalCalendarView(View):
             redis_conn.set(cache_key, json.dumps(booked_dates), 3600)
 
         return {
-            'dates': [(selected_date + timedelta(days=i)).strftime('%m-%d') for i in range(31)],
+            'dates': [(selected_date + timedelta(days=i)).strftime('%m-%d') for i in range(num_days_in_month)],
             'booked_dates': booked_dates,
             'form': RentalForm(),
             'selected_month': selected_date.strftime('%Y-%m'),

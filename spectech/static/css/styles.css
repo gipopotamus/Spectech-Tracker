@@ -51,6 +51,17 @@ td.booked {
   background-color: #314D3F;
   color: white;
 }
+#calendar-container {
+    overflow-x: auto;
+    display: flex;
+}
+
+.fixed-column {
+    position: sticky;
+    left: 0;
+    background-color: #f9f9f9;
+    z-index: 1;
+}
 
 
 
