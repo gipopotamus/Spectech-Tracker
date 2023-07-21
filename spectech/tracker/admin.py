@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericTabularInline
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django_redis import get_redis_connection
@@ -80,6 +81,7 @@ class LegalClientAdmin(admin.ModelAdmin):
 
 
 class ClientAdmin(admin.ModelAdmin):
+    list_display = ['name', 'get_client_type']
     search_fields = ['name']
 
     def has_add_permission(self, request):

@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from polymorphic.models import PolymorphicModel
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 #TODO: update models, add documents
 from django_redis import get_redis_connection
@@ -117,15 +119,27 @@ class Client(PolymorphicModel):
     email = models.EmailField('email')
     phone = models.CharField('телефон', max_length=15)
 
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, editable=False, null=True)
+    object_id = models.PositiveIntegerField(editable=False, null=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
+
     class Meta:
         verbose_name = 'Клиент'
         verbose_name_plural = 'Клиенты'
 
     def __str__(self):
-        return f"{self.email} - {self.get_client_type()}"
+        return f"{self.name} - {self.get_client_type()}"
 
     def get_client_type(self):
-        return ''
+        return self.content_type
+
+    get_client_type.short_description = 'Тип клиента'
+
+    def save(self, *args, **kwargs):
+        # Перед сохранением объекта, устанавливаем соответствующие значения для content_type и object_id
+        self.content_type = ContentType.objects.get_for_model(self)
+        self.object_id = self.id
+        super().save(*args, **kwargs)
 
 
 class IndividualClient(Client):
