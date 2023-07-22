@@ -157,7 +157,7 @@
 
         // Найдем элемент с текущей датой внутри ленты
         const currentDayElement = calendarContainer.querySelector(
-            `th:nth-child(${currentDay - 1})`
+            `th:nth-child(${currentDay })`
         );
         if (!currentDayElement) {
             console.error("Элемент текущего месяца не найден.");

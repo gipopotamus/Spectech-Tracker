@@ -2,7 +2,7 @@
 
   {% block content %}
   <div class="table-responsive">
-    <h2>Список активных аренд</h2>
+    <h2>Список аренд</h2>
     <table class="table">
       <thead>
         <tr>
@@ -15,7 +15,7 @@
       <tbody>
         {% for rental in active_rentals %}
           <tr>
-            <td>{{ rental.client.full_name }}</td>
+            <td>{{ rental.client.name }}</td>
             <td>{{ rental.start_date }} - {{ rental.end_date }}</td>
             <td>{{ rental.car }}</td>
             <td><span class="status-active">Активная</span></td>
@@ -23,7 +23,7 @@
         {% endfor %}
        {% for rental in upcoming_rentals %}
           <tr>
-            <td>{{ rental.client.full_name }}</td>
+            <td>{{ rental.client.name }}</td>
             <td>{{ rental.start_date }} - {{ rental.end_date }}</td>
             <td>{{ rental.car }}</td>
             <td><span class="status-upcoming">Ожидается</span></td>
@@ -47,7 +47,7 @@
       <tbody>
         {% for rental in archive_rentals %}
           <tr class="text-muted">
-            <td>{{ rental.client.full_name }}</td>
+            <td>{{ rental.client.name }}</td>
             <td>{{ rental.start_date }} - {{ rental.end_date }}</td>
             <td>{{ rental.car }}</td>
             <td>Завершена</td>
@@ -56,9 +56,7 @@
       </tbody>
     </table>
   </div>
-  {% endblock %}
-
-  <style>
+    <style>
   /* Стили для статуса "Активная" */
   .status-active {
     display: inline-block;
@@ -77,3 +75,6 @@
     border-radius: 20px;
   }
   </style>
+  {% endblock %}
+
+

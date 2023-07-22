@@ -7,10 +7,9 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
-
 </head>
 <body>
+{% if user.is_authenticated %}
 <nav class="navbar navbar-expand-lg navbar-dark">
     <a class="navbar-brand" href="#">SpecTech</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -45,16 +44,21 @@
                 </div>
             </li>
         </ul>
+        {% if user.is_authenticated %}
         <ul class="navbar-nav ml-auto">
+            {% if user.is_superuser %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'login' %}">Логин</a>
+                <a class="nav-link" href="{% url 'admin:index' %}">Админка</a>
             </li>
+            {% endif %}
             <li class="nav-item">
-                <a class="nav-link" href="#">Регистрация</a>
+                <a class="nav-link" href="{% url 'logout' %}">Выход</a>
             </li>
         </ul>
+        {% endif %}
     </div>
 </nav>
+{% endif %}
 <div class="container">
     {% block content %}
     {% endblock %}

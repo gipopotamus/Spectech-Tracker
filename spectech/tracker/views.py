@@ -1,4 +1,6 @@
 import json
+
+from django.contrib.auth import logout
 from django.db import models
 from django.contrib.auth.views import LoginView
 from django.db.models import Sum, F, ExpressionWrapper, FloatField
@@ -43,6 +45,7 @@ class RentalCalendarView(View):
 
         redis_conn = get_redis_connection()
         cache_key = f"rental_calendar_{selected_month}"
+        print(cache_key, 'nnnnnnnnnnnnnnnnnnn')
         calendar = redis_conn.get(cache_key)
 
         if calendar:
@@ -66,8 +69,6 @@ class RentalCalendarView(View):
                                                       range((rental.end_date - rental.start_date).days + 1))]]
                 }
                 booked_dates[car_name].append(rental_data)
-
-            # Кэшируем данные на 1 час
             redis_conn.set(cache_key, json.dumps(booked_dates), 3600)
 
         return {
@@ -78,6 +79,10 @@ class RentalCalendarView(View):
         }
 
     def get(self, request, *args, **kwargs):
+        selected_month = self.request.GET.get('month')
+        if not selected_month:
+            current_month = timezone.now().strftime('%Y-%m')
+            return redirect(reverse('rental_calendar') + f'?month={current_month}')
         context = self.get_context_data()
         print(context['booked_dates'])
         return render(request, self.template_name, context)
@@ -249,3 +254,8 @@ class CustomLoginView(LoginView):
         if self.request.user.is_authenticated:
             return redirect(self.success_url)
         return super().get(request, *args, **kwargs)
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')

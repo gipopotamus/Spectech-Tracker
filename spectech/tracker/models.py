@@ -1,3 +1,4 @@
+from dateutil.relativedelta import relativedelta
 from django.db import models
 from django.utils import timezone
 from polymorphic.models import PolymorphicModel
@@ -197,7 +198,12 @@ class Rental(models.Model):  # аренда
 
     def clear_cache(self):
         redis_conn = get_redis_connection()
-        redis_conn.delete('rental_calendar')
+        current_date = self.start_date
+        while current_date <= self.end_date:
+            cache_key = f"rental_calendar_{current_date.strftime('%Y-%m')}"
+            print(cache_key)
+            redis_conn.delete(cache_key)
+            current_date += relativedelta(months=1)
 
 
 class Shift(models.Model):  # смена
