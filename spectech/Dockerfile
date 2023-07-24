@@ -18,7 +18,7 @@ RUN mkdir /spectech/static && mkdir /spectech/media
 RUN chmod -R 755 /spectech/static
 
 
-COPY spectech . .
+COPY spectech/ . .
 
 ENV PYTHONPATH /spectech
 
