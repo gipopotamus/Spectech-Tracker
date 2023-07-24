@@ -1,4 +1,4 @@
-version: '2'
+version: '3.9'
 
 services:
   django:
@@ -42,20 +42,12 @@ services:
       - certs:/etc/nginx/certs
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - django
     ports:
       - "${NGINX_EXTERNAL_PORT}:80"
       - "${NGINX_EXTERNAL_SSL_PORT}:443"
-  acme_companion:
-    image: nginxproxy/acme_companion:2.2
-    container_name: spectech_acme_companion
-    volumes_from:
-      - nginx
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - acme:/etc/acme.sh
+
 
 volumes:
   static_volume:
@@ -63,4 +55,3 @@ volumes:
   certs:
   vhost:
   html:
-  acme:
