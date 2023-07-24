@@ -19,6 +19,8 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - nginx_network
   db:
     container_name: postgre_db
     image: postgres:15
@@ -26,10 +28,14 @@ services:
       - ~/.pg/pg_data/spectech:/var/lib/postresql/data
     env_file:
       - .env
+    networks:
+      - nginx_network
   redis:
     image: "redis:5.0.7"
     ports:
       - "6379:6379"
+    networks:
+      - nginx_network
   nginx:
     build:
       dockerfile: ./Dockerfile
@@ -42,12 +48,18 @@ services:
       - certs:/etc/nginx/certs
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     depends_on:
       - django
     ports:
       - "${NGINX_EXTERNAL_PORT}:80"
       - "${NGINX_EXTERNAL_SSL_PORT}:443"
+    networks:
+      - nginx_network
 
+networks:
+  nginx_network:
+    driver: bridge
 
 volumes:
   static_volume:

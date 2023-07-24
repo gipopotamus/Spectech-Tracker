@@ -18,8 +18,10 @@ RUN mkdir /spectech/static && mkdir /spectech/media
 RUN chmod -R 755 /spectech/static
 
 
-COPY spectech . .
+
+COPY spectech . ./
 
 ENV PYTHONPATH /spectech
+RUN chmod +x manage.py
 
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "spectech.wsgi:application"]
