@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="table-responsive">
+  <h2>Список клиентов</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Тип клиента</th>
+        <th>Имя</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for client in clients %}
+        <tr>
+          <td>{{ client.get_client_type }}</td>
+          <td>{{ client.name }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

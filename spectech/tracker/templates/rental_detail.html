@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-4">
+    <a href="{% url 'rental_calendar' %}" class="btn btn-primary mb-3">Назад на календарь</a>
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4 class="card-title">Информация об аренде</h4>
+        <ul class="list-unstyled">
+          <li><strong>Клиент:</strong> {{ rental.client }}</li>
+          <li><strong>Спецтехника:</strong> {{ rental.car }}</li>
+          <li><strong>Дата начала:</strong> {{ rental.start_date }}</li>
+          <li><strong>Дата конца:</strong> {{ rental.end_date }}</li>
+          <li><strong>Итоговая оплата:</strong> {{ total_salary }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Смены</h5>
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Время</th>
+                <th>Оператор</th>
+                <th>Расход топлива</th>
+                <th>Заправлено топлива</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for shift in shifts %}
+                <tr>
+                  <td>{{ shift.date }}</td>
+                  <td>{{ shift.start_time}} - {{shift.end_time }}</td>
+                  <td>{{ shift.worker }}</td>
+                  <td>{{ shift.fuel_consumed }}</td>
+                  <td>{{ shift.fuel_filled }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-primary mt-3" data-toggle="modal" data-target="#addShiftModal">
+      Добавить смену
+    </button>
+  </div>
+
+
+  <!-- Модальное окно для добавления смены -->
+ <div class="modal fade" id="addShiftModal" tabindex="-1" role="dialog" aria-labelledby="addShiftModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addShiftModalLabel">Добавить смену</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="addShiftForm" action="{% url 'add_shift' rental.pk %}" method="post">
+            {% csrf_token %}
+            {{ shift_form.as_p }}
+            <button type="submit" class="btn btn-primary">Добавить</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<style>
+    /* Стили для кнопок */
+    .btn-primary {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+      background-color: #0056b3;
+      color: #fff;
+    }
+
+    .btn-primary:active {
+      background-color: #0056b3;
+      color: #fff;
+      box-shadow: none;
+    }
+  </style>
+  <script>
+    // Обработка отправки формы добавления смены через AJAX
+    $(document).ready(function () {
+      $('#addShiftForm').on('submit', function (event) {
+        event.preventDefault();
+        var form = $(this);
+        var formData = form.serialize();
+
+        $.ajax({
+          url: form.attr('action'),
+          type: 'POST',
+          data: formData,
+          dataType: 'json',
+          success: function (response) {
+            // Обработка успешного ответа и закрытие модального окна
+            $('#addShiftModal').modal('hide');
+            // Здесь вы можете обновить часть страницы с информацией о сменах
+            // в соответствии с полученным ответом, например, перезагрузить часть страницы
+            // или обновить содержимое через JavaScript
+            location.reload(); // Пример: перезагрузка страницы
+          },
+          error: function (response) {
+            // Обработка ошибок при добавлении смены
+            // Здесь вы можете показать пользователю сообщение об ошибке или выполнить другую обработку ошибки
+            console.log(response.responseJSON.errors);
+          }
+        });
+      });
+    });
+  </script>
+{% endblock %}

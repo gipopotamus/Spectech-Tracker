@@ -1,0 +1,67 @@
+body {
+    background-color: #f8f9fa;
+}
+.navbar {
+    background-color: #343a40;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.navbar-nav .nav-item .nav-link {
+    color: #fff;
+}
+.navbar-nav .nav-item .nav-link:hover,
+.navbar-nav .nav-item .nav-link:focus {
+    background-color: #007bff;
+}
+.navbar-nav .dropdown:hover .dropdown-menu {
+    display: block;
+}
+.container {
+    margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+.btn {
+    margin-left: 10px;
+}
+.ml-auto {
+    margin-left: auto !important;
+}
+.dropdown-menu {
+    background-color: #343a40;
+}
+.dropdown-item {
+    color: #fff;
+}
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: #007bff;
+}
+.card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  opacity: 1;
+  transform: translateY(0);
+}
+
+td.booked {
+  white-space: normal; /* Позволяет тексту переноситься на новую строку */
+  word-wrap: break-word; /* Позволяет автоматически переносить длинные слова на новую строку */
+  height: auto; /* Растягивает ячейку по вертикали, чтобы вместить текст */\
+  width: 100px;
+  background-color: #314D3F;
+  color: white;
+}
+#calendar-container {
+    overflow-x: auto;
+    display: flex;
+}
+
+.fixed-column {
+    position: sticky;
+    left: 0;
+    background-color: #f9f9f9;
+    z-index: 1;
+}
+
+
+

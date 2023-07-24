@@ -1,0 +1,7 @@
+location /static/ {
+    alias /spectech/static/;
+}
+
+location /media/ {
+    alias /spectech/media/;
+}

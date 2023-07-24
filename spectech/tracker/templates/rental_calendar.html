@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Календарь аренд</h1>
+
+    <div id="month-selection">
+        <form method="get" action="{% url 'rental_calendar' %}">
+            <div class="form-group row">
+                <label for="month" class="col-sm-2 col-form-label">Выберите месяц:</label>
+                <div class="col-sm-4">
+                    <input type="month" id="month" name="month" class="form-control" value="{{ selected_month }}" required>
+                </div>
+                <div class="col-sm-6">
+                    <button type="submit" class="btn btn-primary">Показать</button>
+                </div>
+            </div>
+        </form>
+    </div>
+<div id="calendar-container" style="overflow-x: scroll;">
+    <table class="table table-bordered table-striped" style="min-width: 100%; table-layout: fixed;">
+        <thead>
+            <tr>
+                <th style="width: 100px;">Car</th>
+                {% for date in dates %}
+                    <th style="width: 100px;">{{ date }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for car_name, rentals in booked_dates.items %}
+                <tr>
+                    <td class="fixed-column">{{ car_name }}</td>
+                    {% for dat in dates %}
+                        {% if dat in rentals|join:", " %}
+                            <td class="booked">
+                                {% for rental in rentals %}
+                                    {% for key, value in rental.items %}
+                                        {% if dat in value.1.0 %}
+                                            <a href="{% url 'rental_detail' key %}" class="text-light">{{ value.0 }}</a>
+                                            <a href="{% url 'rental_delete' key %}" class="delete-rental" style="float: right;">
+                                                <i class="fa fa-trash text-light"></i>
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </td>
+                        {% else %}
+                            <td style="width: 100px;"></td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+    <div id="create-rental-form" style="margin-top: 20px;">
+        <h2>Добавить аренду</h2>
+        <form method="post" action="{% url 'rental_create' %}">
+            {% csrf_token %}
+            <div class="form-group row">
+                <label for="car" class="col-sm-2 col-form-label">Автомобиль:</label>
+                <div class="col-sm-10">
+                    {{ form.car }}
+                    {% if form.car.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.car.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="client" class="col-sm-2 col-form-label">Клиент:</label>
+                <div class="col-sm-10">
+                    {{ form.client }}
+                    {% if form.client.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.client.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="start_date" class="col-sm-2 col-form-label">Дата начала:</label>
+                <div class="col-sm-4">
+                    {{ form.start_date }}
+                    {% if form.start_date.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.start_date.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                <label for="end_date" class="col-sm-2 col-form-label">Дата окончания:</label>
+                <div class="col-sm-4">
+                    {{ form.end_date }}
+                    {% if form.end_date.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.end_date.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-sm-10 offset-sm-2">
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Обработчик события для удаления аренды
+        const deleteLinks = document.getElementsByClassName('delete-rental');
+        for (const link of deleteLinks) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (confirm('Вы уверены, что хотите удалить эту аренду?')) {
+                    const url = this.getAttribute('href');
+                    const rentalId = this.getAttribute('data-rental-id');  // Получаем идентификатор аренды
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({ rental_id: rentalId })  // Передаем идентификатор аренды в теле запроса
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();  // Перезагрузка страницы после успешного удаления
+                        } else {
+                            console.error('Ошибка при удалении аренды');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при удалении аренды:', error);
+                    });
+                }
+            });
+        }
+    </script>
+ <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Найдем элемент ленты
+        const calendarContainer = document.getElementById("calendar-container");
+        if (!calendarContainer) {
+            console.error("Элемент #calendar-container не найден.");
+            return;
+        }
+
+        // Получим текущую дату
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth();
+        const currentDay = currentDate.getDate()
+
+        // Найдем элемент с текущей датой внутри ленты
+        const currentDayElement = calendarContainer.querySelector(
+            `th:nth-child(${currentDay })`
+        );
+        if (!currentDayElement) {
+            console.error("Элемент текущего месяца не найден.");
+            return;
+        }
+
+        // Посчитаем ширину элементов до текущего месяца и прокрутим ленту
+        const scrollPosition = currentDayElement.offsetLeft;
+        calendarContainer.scrollLeft = scrollPosition;
+    });
+</script>
+{% endblock %}
