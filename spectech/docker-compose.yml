@@ -28,10 +28,14 @@ services:
       - ~/.pg/pg_data/spectech:/var/lib/postresql/data
     env_file:
       - .env
+    networks:
+      - nginx_network
   redis:
     image: "redis:5.0.7"
     ports:
       - "6379:6379"
+    networks:
+      - nginx_network
   nginx:
     build:
       dockerfile: ./Dockerfile
