@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'tracker',
+
 ]
 
 MIDDLEWARE = [
@@ -86,6 +87,8 @@ DATABASES = {
         'PASSWORD': env('POSTGRES_PASSWORD'),
         'HOST': env('POSTGRES_HOST'),
         'PORT': env('POSTGRES_PORT')}
+
+    }
  }
 
 
