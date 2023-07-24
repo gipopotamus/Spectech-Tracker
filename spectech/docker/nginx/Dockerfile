@@ -1,5 +1,3 @@
-FROM nginx:latest
+FROM jwilder/nginx-proxy:1.2
 
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d
-COPY proxy_params /etc/nginx
+COPY default_location /etc/nginx/vhost.d/default_location

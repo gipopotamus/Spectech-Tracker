@@ -1,4 +1,4 @@
-version: '3.9'
+version: '2'
 
 services:
   django:
@@ -11,6 +11,9 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      - VIRTUAL_HOST=${ALLOWED_HOST}
+      - LETSENCRYPTS_HOST=${ALLOWED_HOST}
     command: >
       bash -c "./manage.py collectstatic --noinput && ./manage.py migrate && gunicorn -b 0.0.0.0:8000 spectech.wsgi:application"
     depends_on:
@@ -30,17 +33,34 @@ services:
   nginx:
     build:
       dockerfile: ./Dockerfile
-      context: /docker/nginx/
+      context: ./docker/nginx/
     container_name: spectech_nginx
     image: spectech_nginx
     volumes:
       - static_volume:/spectech/static
       - media_volume:/spectech/media
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - django
     ports:
       - "${NGINX_EXTERNAL_PORT}:80"
+      - "${NGINX_EXTERNAL_SSL_PORT}:443"
+  acme_companion:
+    image: nginxproxy/acme_companion:2.2
+    container_name: spectech_acme_companion
+    volumes_from:
+      - nginx
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme:/etc/acme.sh
 
 volumes:
   static_volume:
   media_volume:
+  certs:
+  vhost:
+  html:
+  acme:
