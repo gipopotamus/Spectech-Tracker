@@ -146,6 +146,3 @@ CACHES = {
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
-
-CSRF_TRUSTED_ORIGINS = ['88.218.62.134']
-
