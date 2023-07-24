@@ -16,6 +16,7 @@ WORKDIR /spectech
 RUN mkdir /spectech/static && mkdir /spectech/media
 
 RUN chmod -R 755 /spectech/static
+RUN chmod +x manage.py
 
 
 COPY spectech . ./
