@@ -27,7 +27,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [env("ALLOWED_HOST"), ]
+ALLOWED_HOSTS = ["*" ]
 
 
 # Application definition
@@ -146,6 +146,4 @@ CACHES = {
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
-
-CSRF_TRUSTED_ORIGINS = ['88.218.62.134']
 
