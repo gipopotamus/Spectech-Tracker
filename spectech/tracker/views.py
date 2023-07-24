@@ -45,7 +45,6 @@ class RentalCalendarView(View):
 
         redis_conn = get_redis_connection()
         cache_key = f"rental_calendar_{selected_month}"
-        print(cache_key, 'nnnnnnnnnnnnnnnnnnn')
         calendar = redis_conn.get(cache_key)
 
         if calendar:
@@ -84,7 +83,6 @@ class RentalCalendarView(View):
             current_month = timezone.now().strftime('%Y-%m')
             return redirect(reverse('rental_calendar') + f'?month={current_month}')
         context = self.get_context_data()
-        print(context['booked_dates'])
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
