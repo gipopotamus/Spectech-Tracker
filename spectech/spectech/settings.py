@@ -89,7 +89,6 @@ DATABASES = {
         'PORT': env('POSTGRES_PORT')}
 
     }
- }
 
 
 # Password validation
