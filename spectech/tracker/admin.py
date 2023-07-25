@@ -18,7 +18,6 @@ class CarInline(admin.TabularInline):
     can_delete = False
 
 
-
 class OwnerAdmin(admin.ModelAdmin):
     list_display = ['name', 'owner_type', 'INN']
     search_fields = ['name', 'INN']
@@ -77,7 +76,6 @@ class IndividualClientAdmin(admin.ModelAdmin):
     autocomplete_fields = ['build_object']
 
 
-@admin.register(LegalClient)
 class LegalClientAdmin(admin.ModelAdmin):
     list_display = ['name']
     search_fields = ['name']
