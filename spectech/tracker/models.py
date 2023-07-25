@@ -238,7 +238,7 @@ class Tariff(models.Model):
 #     amount = models.DecimalField(max_digits=10, decimal_places=2)
 #     # Дополнительные поля
 
-=======
+
 from django.db import models
 from django.utils import timezone
 
