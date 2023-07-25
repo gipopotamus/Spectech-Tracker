@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils.html import format_html
 from django_redis import get_redis_connection
 
 from .models import Owner, Leasing, CarType, Car, Worker, BuildObject, Shift, Rental, Insurance, IndividualClient, \
@@ -11,10 +12,11 @@ from .models import Owner, Leasing, CarType, Car, Worker, BuildObject, Shift, Re
 class CarInline(admin.TabularInline):
     model = Car
     extra = 0
-    readonly_fields = ['name', 'model', 'car_type', 'number', 'start_date', 'end_date', 'price', 'owner',
-                       'fuel_consumption', 'leasing']
+    fields = ['name']
+    readonly_fields = ['name']
     collapse = True
     can_delete = False
+
 
 
 class OwnerAdmin(admin.ModelAdmin):
@@ -37,6 +39,7 @@ class CarTypeAdmin(admin.ModelAdmin):
 class InsuranceInline(admin.StackedInline):
     model = Insurance
     can_delete = False
+    extra = 1
 
 
 class CarAdmin(admin.ModelAdmin):
@@ -74,6 +77,7 @@ class IndividualClientAdmin(admin.ModelAdmin):
     autocomplete_fields = ['build_object']
 
 
+@admin.register(LegalClient)
 class LegalClientAdmin(admin.ModelAdmin):
     list_display = ['name']
     search_fields = ['name']
@@ -131,10 +135,17 @@ class TariffAdmin(admin.ModelAdmin):
     search_fields = ['name']  # Добавьте поле для поиска тарифов
 
 
+class ShiftInline(admin.TabularInline):
+    model = Shift
+    extra = 0
+    readonly_fields = ['worker', 'fuel_filled', 'fuel_consumed', 'date', 'start_time', 'end_time']
+
+
 class RentalAdmin(admin.ModelAdmin):
     list_display = ['client', 'car', 'start_date', 'end_date', 'tariff']
     list_filter = ['start_date', 'end_date']
     autocomplete_fields = ['client', 'car', 'tariff']
+    inlines = [ShiftInline]
 
     def delete_queryset(self, request, queryset):
         queryset.delete()
@@ -146,14 +157,14 @@ class RentalAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Owner, OwnerAdmin)
-admin.site.register(Leasing, LeasingAdmin)
+admin.site.register(Leasing)
 admin.site.register(CarType, CarTypeAdmin)
 admin.site.register(Car, CarAdmin)
 admin.site.register(IndividualClient, IndividualClientAdmin)
-admin.site.register(LegalClient, LegalClientAdmin)
 admin.site.register(Worker, WorkerAdmin)
 admin.site.register(BuildObject, BuildObjectAdmin)
 admin.site.register(Shift, ShiftAdmin)
 admin.site.register(Rental, RentalAdmin)
 admin.site.register(Tariff, TariffAdmin)
 admin.site.register(Client, ClientAdmin)
+admin.site.site_header = 'Панель администратора'

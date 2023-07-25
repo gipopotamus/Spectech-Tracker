@@ -16,12 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 
 from tracker.views import CustomLoginView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('rental/', include('tracker.urls')),
-    path('login/', CustomLoginView.as_view(), name='login')
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('', RedirectView.as_view(url='/rental/calendar/'))
 ]
 

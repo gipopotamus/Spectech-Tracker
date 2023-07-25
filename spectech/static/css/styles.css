@@ -29,6 +29,7 @@ body {
 }
 .dropdown-menu {
     background-color: #343a40;
+    margin-top: 0px;
 }
 .dropdown-item {
     color: #fff;
@@ -62,6 +63,8 @@ td.booked {
     background-color: #f9f9f9;
     z-index: 1;
 }
+
+
 
 
 

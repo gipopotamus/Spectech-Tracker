@@ -2,7 +2,7 @@ from django import forms
 from django.forms import formset_factory
 from django.utils import timezone
 
-from .models import Rental, Shift, Worker
+from .models import Rental, Shift
 
 
 class ShiftForm(forms.ModelForm):
@@ -14,6 +14,14 @@ class ShiftForm(forms.ModelForm):
             'start_time': forms.TimeInput(attrs={'type': 'time'}),
             'end_time': forms.TimeInput(attrs={'type': 'time'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+        if instance and instance.rental:
+            rental = instance.rental
+            self.fields['date'].widget.attrs['min'] = rental.start_date.strftime('%Y-%m-%d')
+            self.fields['date'].widget.attrs['max'] = rental.end_date.strftime('%Y-%m-%d')
 
 
 class RentalForm(forms.ModelForm):
