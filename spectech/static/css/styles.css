@@ -29,7 +29,7 @@ body {
 }
 .dropdown-menu {
     background-color: #343a40;
-    margin-top: 0px;
+    margin-top: -2px;
 }
 .dropdown-item {
     color: #fff;
