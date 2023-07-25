@@ -25,7 +25,7 @@ services:
     container_name: postgre_db
     image: postgres:15
     volumes:
-      - ~/.pg/pg_data/spectech:/var/lib/postresql/data
+      - db_data::/var/lib/postresql/data
     env_file:
       - .env
     networks:
@@ -62,6 +62,7 @@ networks:
     driver: bridge
 
 volumes:
+  db_data:
   static_volume:
   media_volume:
   certs:
