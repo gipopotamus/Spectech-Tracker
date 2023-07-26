@@ -25,7 +25,7 @@ services:
     container_name: postgre_db
     image: postgres:15
     volumes:
-      - db_data:/var/lib/postresql/data
+      - pgdata:/var/lib/postgresql/data
     env_file:
       - .env
     networks:
@@ -62,7 +62,7 @@ networks:
     driver: bridge
 
 volumes:
-  db_data:
+  pgdata:
     driver: local
   static_volume:
   media_volume:
