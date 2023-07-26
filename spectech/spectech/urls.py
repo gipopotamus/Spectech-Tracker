@@ -20,10 +20,13 @@ from django.views.generic import RedirectView
 
 from tracker.views import CustomLoginView
 
+from tracker.views import get_build_objects
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('rental/', include('tracker.urls')),
     path('login/', CustomLoginView.as_view(), name='login'),
-    path('', RedirectView.as_view(url='/rental/calendar/'))
+    path('', RedirectView.as_view(url='/rental/calendar/')),
+    path('get_build_objects/', get_build_objects, name='get_build_objects'),
 ]
 

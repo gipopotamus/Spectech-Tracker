@@ -70,16 +70,21 @@ class CarAdmin(admin.ModelAdmin):
     inlines = [InsuranceInline]
 
 
+class BuildObjectInline(admin.StackedInline):
+    model = BuildObject
+    extra = 1
+
+
 class IndividualClientAdmin(admin.ModelAdmin):
     list_display = ['name']
     search_fields = ['name']
-    autocomplete_fields = ['build_object']
+    inlines = [BuildObjectInline]
 
 
 class LegalClientAdmin(admin.ModelAdmin):
     list_display = ['name']
     search_fields = ['name']
-    autocomplete_fields = ['build_object']
+    inlines = [BuildObjectInline]
 
 
 class ClientAdmin(admin.ModelAdmin):
@@ -119,8 +124,9 @@ class WorkerAdmin(admin.ModelAdmin):
 
 
 class BuildObjectAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name', 'client']
     search_fields = ['name']
+    list_filter = ['client']
 
 
 class ShiftAdmin(admin.ModelAdmin):
@@ -145,13 +151,22 @@ class RentalAdmin(admin.ModelAdmin):
     autocomplete_fields = ['client', 'car', 'tariff']
     inlines = [ShiftInline]
 
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:  # Проверяем, что объект не сохранен (новый объект)
+            obj.manager = request.user
+        super().save_model(request, obj, form, change)
+
     def delete_queryset(self, request, queryset):
         queryset.delete()
         self.clear_cache()
 
     def clear_cache(self):
         redis_conn = get_redis_connection()
-        redis_conn.delete('rental_calendar')
+        current_date = self.start_date
+        while current_date <= self.end_date:
+            cache_key = f"rental_calendar_{current_date.strftime('%Y-%m')}"
+            redis_conn.delete(cache_key)
+            current_date += relativedelta(months=1)
 
 
 admin.site.register(Owner, OwnerAdmin)
@@ -159,6 +174,7 @@ admin.site.register(Leasing)
 admin.site.register(CarType, CarTypeAdmin)
 admin.site.register(Car, CarAdmin)
 admin.site.register(IndividualClient, IndividualClientAdmin)
+admin.site.register(LegalClient, LegalClientAdmin)
 admin.site.register(Worker, WorkerAdmin)
 admin.site.register(BuildObject, BuildObjectAdmin)
 admin.site.register(Shift, ShiftAdmin)

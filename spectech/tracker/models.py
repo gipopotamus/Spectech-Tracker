@@ -1,10 +1,14 @@
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 from polymorphic.models import PolymorphicModel
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django_redis import get_redis_connection
+
+
+User = get_user_model()
 
 
 class Owner(models.Model):  # владелец
@@ -40,6 +44,9 @@ class Leasing(models.Model):
     class Meta:
         verbose_name = 'Лизинг'
         verbose_name_plural = 'Лизинг'
+
+    def __str__(self):
+        return f"{self.bank} - {self.amount}"
 
 
 class Insurance(models.Model):
@@ -103,7 +110,7 @@ class Worker(models.Model):  # рабочий-оператор
 class BuildObject(models.Model):
     name = models.CharField('название объекта', max_length=100)
     address = models.CharField('адрес объекта', max_length=200)
-
+    client = models.ForeignKey('Client', verbose_name='клиент', on_delete=models.CASCADE)
     class Meta:
         verbose_name = 'Объект'
         verbose_name_plural = 'Объекты'
@@ -114,7 +121,6 @@ class BuildObject(models.Model):
 
 class Client(PolymorphicModel):
     name = models.CharField('имя/название огранизации', max_length=50)
-    build_object = models.ForeignKey('BuildObject', verbose_name='объект', blank=True, on_delete=models.CASCADE)
     email = models.EmailField('email')
     phone = models.CharField('телефон', max_length=15)
 
@@ -175,7 +181,10 @@ class Rental(models.Model):  # аренда
     car = models.ForeignKey(Car, verbose_name='техника', on_delete=models.CASCADE)
     start_date = models.DateField('дата начала')
     end_date = models.DateField('дата окончания')
+    manager = models.ForeignKey(User, verbose_name='менеджер', on_delete=models.CASCADE)
     tariff = models.ForeignKey('Tariff', verbose_name='тариф', on_delete=models.CASCADE, blank=True, null=True)
+    build_object = models.ForeignKey(BuildObject, verbose_name='объект', on_delete=models.CASCADE, blank=True,
+                                     null=True)
 
     # Дополнительные поля
 

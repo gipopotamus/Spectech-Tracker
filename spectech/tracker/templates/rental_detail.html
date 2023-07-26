@@ -2,16 +2,19 @@
 
 {% block content %}
   <div class="container mt-4">
-    <a href="{% url 'rental_calendar' %}" class="btn btn-primary mb-3">Назад на календарь</a>
+    <a href="{% url 'rental_list' %}" class="btn btn-primary mb-3">Назад к списку</a>
     <div class="card mb-3">
       <div class="card-body">
         <h4 class="card-title">Информация об аренде</h4>
         <ul class="list-unstyled">
           <li><strong>Клиент:</strong> {{ rental.client }}</li>
           <li><strong>Спецтехника:</strong> {{ rental.car }}</li>
+          <li><strong>Владелец техники:</strong> {{ rental.car.owner }}</li>
+          <li><strong>Менеджер:</strong> {{ rental.manager.get_full_name }}</li>
           <li><strong>Дата начала:</strong> {{ rental.start_date }}</li>
           <li><strong>Дата конца:</strong> {{ rental.end_date }}</li>
           <li><strong>Итоговая оплата:</strong> {{ total_salary }}</li>
+          <li><strong>Строительный объект:</strong> {{ rental.build_object }}</li>
         </ul>
       </div>
     </div>

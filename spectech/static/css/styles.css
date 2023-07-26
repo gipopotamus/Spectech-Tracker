@@ -63,3 +63,66 @@ td.booked {
     background-color: #f9f9f9;
     z-index: 1;
 }
+
+/* Стили для формы добавления аренды */
+/* Общие стили для формы */
+#create-rental-form {
+  margin-top: 20px;
+}
+
+#create-rental-form h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+#create-rental-form form {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+#create-rental-form .form-group {
+  margin-bottom: 20px;
+}
+
+#create-rental-form label {
+  font-weight: bold;
+}
+
+#create-rental-form input[type="text"],
+#create-rental-form select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+#create-rental-form .btn-primary {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#create-rental-form .btn-primary:hover {
+      background-color: #0056b3;
+}
+
+/* Адаптация для смартфонов */
+@media (max-width: 767px) {
+  #create-rental-form form {
+    padding: 10px;
+  }
+
+  #create-rental-form .form-group {
+    margin-bottom: 10px;
+  }
+
+  #create-rental-form .col-sm-2,
+  #create-rental-form .col-sm-4 {
+    flex: 1 0 100%; /* Устанавливаем равные доли ширины */
+  }
+}

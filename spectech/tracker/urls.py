@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import RentalCalendarView, RentalDetailView, RentalDeleteView, CarListView, CarDetailView, ClientListView, \
-    ShiftCreateView, RentalListView, logout_view
+    ShiftCreateView, RentalListView, logout_view, get_build_objects
 
 urlpatterns = [
     path('calendar/', RentalCalendarView.as_view(), name='rental_calendar'),
