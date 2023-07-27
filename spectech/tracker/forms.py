@@ -36,6 +36,6 @@ class RentalForm(forms.ModelForm):
             'build_object': 'объект'
         }
         widgets = {
-            'start_date': forms.DateInput(attrs={'type': 'date', 'min': timezone.now().date()}),
-            'end_date': forms.DateInput(attrs={'type': 'date', 'min': timezone.now().date()}),
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
         }
