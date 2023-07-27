@@ -12,7 +12,7 @@
     </thead>
     <tbody>
       {% for client in clients %}
-         <tr onclick="window.location.href='{{ client.url }}';" style="cursor: pointer;">
+         <tr>
           <td>{{ client.get_client_type }}</td>
           <td>{{ client.name }}</td>
         </tr>
