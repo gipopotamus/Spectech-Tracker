@@ -11,6 +11,7 @@ from django.utils.datetime_safe import datetime
 from django.views import View
 from django.views.generic import DetailView, ListView, CreateView
 from django_redis import get_redis_connection
+
 from .forms import RentalForm, ShiftForm
 from .models import Car, Rental, Shift, Client
 
@@ -20,17 +21,39 @@ from datetime import timedelta
 class RentalCalendarView(View):
     template_name = 'rental_calendar.html'
 
-    def get_context_data(self):
-        today = timezone.now().date()
-        dates = [(today + timedelta(days=i)).strftime('%m-%d') for i in range(31)]
+    def get_first_and_last_day_of_month(self, date):
+        first_day = date.replace(day=1)
+        last_day = date.replace(day=1) + timedelta(days=32)
+        last_day = last_day.replace(day=1) - timedelta(days=1)
+        return first_day, last_day
 
+    def get_context_data(self):
+        # Получаем текущую дату
+        today = timezone.now().date()
+
+        # Получаем выбранную дату из формы, если не выбрана, то используем текущий месяц
+        selected_month = self.request.GET.get('month')
+        if selected_month:
+            selected_date = timezone.datetime.strptime(selected_month, '%Y-%m').date()
+
+        else:
+            selected_date = today.replace(day=1)
+        # Получаем первый и последний день выбранного месяца
+        first_day_of_month, last_day_of_month = self.get_first_and_last_day_of_month(selected_date)
         redis_conn = get_redis_connection()
-        calendar = redis_conn.get('rental_calendar')
+        # Проверяем кэш на наличие данных для выбранного месяца
+        cache_key = f"rental_calendar_{selected_month}"
+        calendar = redis_conn.get(cache_key)
 
         if calendar:
             booked_dates = json.loads(calendar)
         else:
-            rentals = Rental.objects.all()
+            # Если данных в кэше нет, то генерируем и кэшируем их
+            rentals = Rental.objects.filter(
+                end_date__gte=first_day_of_month,
+                start_date__lte=last_day_of_month
+            )
+            print(rentals)
             booked_dates = {}
             cars = Car.objects.all()
 
@@ -41,23 +64,24 @@ class RentalCalendarView(View):
                 car_name = rental.car.name
                 rental_data = {
                     rental.id: [rental.client.name, [date.strftime('%m-%d') for date in
-                                (rental.start_date + timedelta(days=i) for i in
-                                 range((rental.end_date - rental.start_date).days + 1))]]
+                                                     (rental.start_date + timedelta(days=i) for i in
+                                                      range((rental.end_date - rental.start_date).days + 1))]]
                 }
-
                 booked_dates[car_name].append(rental_data)
 
-            redis_conn.set('rental_calendar', json.dumps(booked_dates), ex=86400)
+            # Кэшируем данные на 1 час
+            redis_conn.set(cache_key, json.dumps(booked_dates), 3600)
 
         return {
-            'dates': dates,
+            'dates': [(selected_date + timedelta(days=i)).strftime('%m-%d') for i in range(31)],
             'booked_dates': booked_dates,
             'form': RentalForm(),
+            'selected_month': selected_date.strftime('%Y-%m'),
         }
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()
-
+        print(context['booked_dates'])
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):

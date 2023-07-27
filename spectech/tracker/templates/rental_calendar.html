@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-
 {% block content %}
     <h1>Календарь аренд</h1>
+
     <div id="month-selection">
         <form method="get" action="{% url 'rental_calendar' %}">
             <div class="form-group row">
@@ -29,18 +29,16 @@
                 {% for car_name, rentals in booked_dates.items %}
                     <tr>
                         <td style="width: 100px;">{{ car_name }}</td>
-                        {% for date in dates %}
-                            {% if date in rentals|join:", " %}
+                        {% for dat in dates %}
+                            {% if dat in rentals|join:", " %}
                                 <td class="booked">
                                     {% for rental in rentals %}
                                         {% for key, value in rental.items %}
-                                            {% if date in value.1 %}
-                                                     {% if forloop.first %}
+                                            {% if dat in value.1.0 %}
                                                 <a href="{% url 'rental_detail' key %}" class="text-light">{{ value.0 }}</a>
                                                 <a href="{% url 'rental_delete' key %}" class="delete-rental" style="float: right;">
                                                     <i class="fa fa-trash text-light"></i>
                                                 </a>
-                                            {% endif %}
                                              {% endif %}
                                         {% endfor %}
                                     {% endfor %}
@@ -54,7 +52,6 @@
             </tbody>
         </table>
     </div>
-
     <div id="create-rental-form" style="margin-top: 20px;">
         <h2>Добавить аренду</h2>
         <form method="post" action="{% url 'rental_create' %}">
