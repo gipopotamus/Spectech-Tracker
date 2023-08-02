@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils.html import format_html
 from django_redis import get_redis_connection
 
 from .models import Owner, Leasing, CarType, Car, Worker, BuildObject, Shift, Rental, Insurance, IndividualClient, \
@@ -11,8 +12,8 @@ from .models import Owner, Leasing, CarType, Car, Worker, BuildObject, Shift, Re
 class CarInline(admin.TabularInline):
     model = Car
     extra = 0
-    readonly_fields = ['name', 'model', 'car_type', 'number', 'start_date', 'end_date', 'price', 'owner',
-                       'fuel_consumption', 'leasing']
+    fields = ['name']
+    readonly_fields = ['name']
     collapse = True
     can_delete = False
 
@@ -37,6 +38,7 @@ class CarTypeAdmin(admin.ModelAdmin):
 class InsuranceInline(admin.StackedInline):
     model = Insurance
     can_delete = False
+    extra = 1
 
 
 class CarAdmin(admin.ModelAdmin):
@@ -68,16 +70,21 @@ class CarAdmin(admin.ModelAdmin):
     inlines = [InsuranceInline]
 
 
+class BuildObjectInline(admin.StackedInline):
+    model = BuildObject
+    extra = 1
+
+
 class IndividualClientAdmin(admin.ModelAdmin):
     list_display = ['name']
     search_fields = ['name']
-    autocomplete_fields = ['build_object']
+    inlines = [BuildObjectInline]
 
 
 class LegalClientAdmin(admin.ModelAdmin):
     list_display = ['name']
     search_fields = ['name']
-    autocomplete_fields = ['build_object']
+    inlines = [BuildObjectInline]
 
 
 class ClientAdmin(admin.ModelAdmin):
@@ -117,8 +124,9 @@ class WorkerAdmin(admin.ModelAdmin):
 
 
 class BuildObjectAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name', 'client']
     search_fields = ['name']
+    list_filter = ['client']
 
 
 class ShiftAdmin(admin.ModelAdmin):
@@ -131,10 +139,22 @@ class TariffAdmin(admin.ModelAdmin):
     search_fields = ['name']  # Добавьте поле для поиска тарифов
 
 
+class ShiftInline(admin.TabularInline):
+    model = Shift
+    extra = 0
+    readonly_fields = ['worker', 'fuel_filled', 'fuel_consumed', 'date', 'start_time', 'end_time']
+
+
 class RentalAdmin(admin.ModelAdmin):
     list_display = ['client', 'car', 'start_date', 'end_date', 'tariff']
     list_filter = ['start_date', 'end_date']
     autocomplete_fields = ['client', 'car', 'tariff']
+    inlines = [ShiftInline]
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:  # Проверяем, что объект не сохранен (новый объект)
+            obj.manager = request.user
+        super().save_model(request, obj, form, change)
 
     def delete_queryset(self, request, queryset):
         queryset.delete()
@@ -142,11 +162,15 @@ class RentalAdmin(admin.ModelAdmin):
 
     def clear_cache(self):
         redis_conn = get_redis_connection()
-        redis_conn.delete('rental_calendar')
+        current_date = self.start_date
+        while current_date <= self.end_date:
+            cache_key = f"rental_calendar_{current_date.strftime('%Y-%m')}"
+            redis_conn.delete(cache_key)
+            current_date += relativedelta(months=1)
 
 
 admin.site.register(Owner, OwnerAdmin)
-admin.site.register(Leasing, LeasingAdmin)
+admin.site.register(Leasing)
 admin.site.register(CarType, CarTypeAdmin)
 admin.site.register(Car, CarAdmin)
 admin.site.register(IndividualClient, IndividualClientAdmin)
@@ -157,105 +181,4 @@ admin.site.register(Shift, ShiftAdmin)
 admin.site.register(Rental, RentalAdmin)
 admin.site.register(Tariff, TariffAdmin)
 admin.site.register(Client, ClientAdmin)
-=======
-from django.contrib import admin
-from .models import Owner, Leasing, CarType, Car, YRClient, Representative, Worker, ConstructionObject, Shift, Rental
-
-
-class CarInline(admin.TabularInline):
-    model = Car
-    extra = 0
-    readonly_fields = ['name', 'model', 'number', 'start_date', 'end_date', 'price', 'owner', 'fuel_consumption',
-                       'leasing']
-    collapse = True
-    can_delete = False
-    show_change_link = True
-
-
-class OwnerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'owner_type', 'INN']
-    search_fields = ['name', 'INN']
-    inlines = [CarInline]
-
-
-class LeasingAdmin(admin.ModelAdmin):
-    list_display = ['name', 'start_date', 'end_date', 'amount']
-    search_fields = ['name']
-
-
-class CarTypeAdmin(admin.ModelAdmin):
-    list_display = ['name']
-    search_fields = ['name']
-
-
-class CarAdmin(admin.ModelAdmin):
-    list_display = ['name', 'model', 'number', 'start_date', 'end_date', 'price', 'owner', 'leasing']
-    list_filter = ['leasing']
-    search_fields = ['name', 'model', 'number']
-    autocomplete_fields = ['owner']
-    readonly_fields = ['start_date']
-    fieldsets = [
-        (None, {'fields': ['name', 'model', 'number']}),
-        ('Dates', {'fields': ['start_date', 'end_date']}),
-        ('Details', {'fields': ['price', 'owner', 'fuel_consumption', 'leasing']}),
-    ]
-
-
-class YRClientAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'documents', 'address', 'black_list', 'representative']
-    search_fields = ['full_name', 'documents']
-    list_filter = ['black_list']
-    autocomplete_fields = ['representative']
-    readonly_fields = ['black_list']
-    fieldsets = [
-        (None, {'fields': ['full_name', 'documents', 'address']}),
-        ('Status', {'fields': ['black_list', 'representative']}),
-    ]
-
-
-class RepresentativeAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'company', 'INN', 'black_list', 'passport']
-    search_fields = ['full_name', 'passport']
-    list_filter = ['black_list']
-    autocomplete_fields = ['company']
-    readonly_fields = ['black_list']
-    fieldsets = [
-        (None, {'fields': ['full_name', 'company', 'INN']}),
-        ('Status', {'fields': ['black_list', 'passport']}),
-    ]
-
-
-class WorkerAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'mobile_numer', 'hourly_rate', 'passport']
-    search_fields = ['full_name', 'mobile_numer']
-    list_filter = ['hourly_rate']
-
-
-class ConstructionObjectAdmin(admin.ModelAdmin):
-    list_display = ['name', 'client']
-    search_fields = ['name']
-    autocomplete_fields = ['client']
-
-
-class ShiftAdmin(admin.ModelAdmin):
-    list_display = ['date', 'worker', 'fuel_filled', 'fuel_consumed', 'rental']
-    search_fields = ['date']
-    autocomplete_fields = ['worker', 'rental']
-
-
-class RentalAdmin(admin.ModelAdmin):
-    list_display = ['client', 'car', 'start_date', 'end_date']
-    search_fields = ['start_date']
-    autocomplete_fields = ['client', 'car']
-
-
-admin.site.register(Owner, OwnerAdmin)
-admin.site.register(Leasing, LeasingAdmin)
-admin.site.register(CarType, CarTypeAdmin)
-admin.site.register(Car, CarAdmin)
-admin.site.register(YRClient, YRClientAdmin)
-admin.site.register(Representative, RepresentativeAdmin)
-admin.site.register(Worker, WorkerAdmin)
-admin.site.register(ConstructionObject, ConstructionObjectAdmin)
-admin.site.register(Shift, ShiftAdmin)
-admin.site.register(Rental, RentalAdmin)
+admin.site.site_header = 'Панель администратора'

@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
 </head>
 <body>
 {% if user.is_authenticated %}
@@ -20,28 +22,17 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'rental_calendar'%}">Календарь</a>
             </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false">
-                    Списки
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown1">
-                    <a class="dropdown-item" href="{% url 'car_list'%}">Техника</a>
-                    <a class="dropdown-item" href="{% url 'client_list'%}">Клиенты</a>
-                    <a class="dropdown-item" href="{% url 'rental_list'%}">Аренды</a>
-                </div>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false">
-                    Кнопка 2
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
-                    <a class="dropdown-item" href="rental/list/cars">1</a>
-                    <a class="dropdown-item" href="#">2</a>
-                    <a class="dropdown-item" href="#">3</a>
-                </div>
-            </li>
+           <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown"
+       aria-haspopup="true" aria-expanded="false">
+        Списки
+    </a>
+    <div class="dropdown-menu animate__animated animate__fade" aria-labelledby="navbarDropdown1">
+        <a class="dropdown-item" href="{% url 'car_list'%}">Техника</a>
+        <a class="dropdown-item" href="{% url 'client_list'%}">Заказчики</a>
+        <a class="dropdown-item" href="{% url 'rental_list'%}">Аренды</a>
+    </div>
+</li>
         </ul>
         {% if user.is_authenticated %}
         <ul class="navbar-nav ml-auto">

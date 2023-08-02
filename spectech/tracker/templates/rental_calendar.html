@@ -54,60 +54,74 @@
 </div>
 
 
-    <div id="create-rental-form" style="margin-top: 20px;">
-        <h2>Добавить аренду</h2>
-        <form method="post" action="{% url 'rental_create' %}">
-            {% csrf_token %}
-            <div class="form-group row">
-                <label for="car" class="col-sm-2 col-form-label">Автомобиль:</label>
-                <div class="col-sm-10">
-                    {{ form.car }}
-                    {% if form.car.errors %}
-                        <div class="invalid-feedback">
-                            {{ form.car.errors }}
-                        </div>
-                    {% endif %}
-                </div>
+<div id="create-rental-form" style="margin-top: 20px;">
+    <h2>Добавить аренду</h2>
+    <form method="post" action="{% url 'rental_create' %}">
+        {% csrf_token %}
+        <div class="form-group row">
+            <label for="car" class="col-md-2 col-form-label">Автомобиль:</label>
+            <div class="col-md-10">
+                {{ form.car }}
+                {% if form.car.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.car.errors }}
+                    </div>
+                {% endif %}
             </div>
-            <div class="form-group row">
-                <label for="client" class="col-sm-2 col-form-label">Клиент:</label>
-                <div class="col-sm-10">
-                    {{ form.client }}
-                    {% if form.client.errors %}
-                        <div class="invalid-feedback">
-                            {{ form.client.errors }}
-                        </div>
-                    {% endif %}
-                </div>
+        </div>
+        <div class="form-group row">
+            <label for="client" class="col-md-2 col-form-label">Клиент:</label>
+            <div class="col-md-4">
+                {{ form.client }}
             </div>
-            <div class="form-group row">
-                <label for="start_date" class="col-sm-2 col-form-label">Дата начала:</label>
-                <div class="col-sm-4">
-                    {{ form.start_date }}
-                    {% if form.start_date.errors %}
-                        <div class="invalid-feedback">
-                            {{ form.start_date.errors }}
-                        </div>
-                    {% endif %}
-                </div>
-                <label for="end_date" class="col-sm-2 col-form-label">Дата окончания:</label>
-                <div class="col-sm-4">
-                    {{ form.end_date }}
-                    {% if form.end_date.errors %}
-                        <div class="invalid-feedback">
-                            {{ form.end_date.errors }}
-                        </div>
-                    {% endif %}
-                </div>
+            <label for="build_object" class="col-md-2 col-form-label">Объект:</label>
+            <div class="col-md-4">
+                <select name="build_object" id="id_build_object" class="form-control" style="height: auto;">
+                </select>
             </div>
+        </div>
+        <div class="form-group row">
+            <label for="manager" class="col-md-2 col-form-label">Менеджер:</label>
+            <div class="col-md-4">
+                {{ form.manager }}
+                {% if form.manager.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.manager.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            </div>
+        <div class="form-group row">
+            <label for="start_date" class="col-md-2 col-form-label">Дата начала:</label>
+            <div class="col-md-4">
+                {{ form.start_date }}
+                {% if form.start_date.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.start_date.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="end_date" class="col-md-2 col-form-label">Дата окончания:</label>
+            <div class="col-md-4">
+                {{ form.end_date }}
+                {% if form.end_date.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.end_date.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
 
-            <div class="form-group row">
-                <div class="col-sm-10 offset-sm-2">
-                    <button type="submit" class="btn btn-primary">Создать</button>
-                </div>
+        <div class="form-group row">
+            <div class="col-md-10 offset-md-2">
+                <button type="submit" class="btn btn-primary">Создать</button>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
+</div>
+
 
     <script>
         // Обработчик события для удаления аренды
@@ -169,4 +183,23 @@
         calendarContainer.scrollLeft = scrollPosition;
     });
 </script>
+<script>
+    document.getElementById('id_client').addEventListener('change', function () {
+        var clientId = this.value;
+        var buildObjectField = document.getElementById('id_build_object');
+        buildObjectField.innerHTML = '';
+
+        fetch(`/get_build_objects/?client_id=${clientId}`)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(obj => {
+                    var option = document.createElement('option');
+                    option.value = obj.id;
+                    option.textContent = obj.name + ' - ' + obj.address;
+                    buildObjectField.appendChild(option);
+                });
+            });
+    });
+</script>
+
 {% endblock %}

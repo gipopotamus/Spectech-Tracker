@@ -15,7 +15,7 @@ from django.views.generic import DetailView, ListView, CreateView
 from django_redis import get_redis_connection
 import calendar as cal
 from .forms import RentalForm, ShiftForm
-from .models import Car, Rental, Shift, Client
+from .models import Car, Rental, Shift, Client, BuildObject
 
 from datetime import timedelta
 
@@ -96,6 +96,13 @@ class RentalCalendarView(View):
             return render(request, self.template_name, context)
 
 
+def get_build_objects(request):
+    if request.method == 'GET':
+        client_id = request.GET.get('client_id')
+        build_objects = BuildObject.objects.filter(client_id=client_id).values('id', 'name', 'address')
+        return JsonResponse(list(build_objects), safe=False)
+
+
 class RentalDeleteView(View):
     def post(self, request, *args, **kwargs):
         rental_id = self.kwargs['pk']
@@ -138,7 +145,7 @@ class RentalDetailView(DetailView):
 
         # Рассчитываем общую сумму оплаты за все смены
         total_salary = shifts.aggregate(total_salary=Sum('total_payment'))['total_salary'] or 0
-        context['shift_form'] = ShiftForm(initial={'rental' : self.object.pk})
+        context['shift_form'] = ShiftForm(initial={'rental': self.object.pk})
         context['shifts'] = shifts
         context['total_salary'] = total_salary
 
@@ -162,7 +169,9 @@ class RentalListView(ListView):
         context['active_rentals'] = Rental.objects.filter(start_date__lte=current_date, end_date__gte=current_date)
         context['upcoming_rentals'] = Rental.objects.filter(start_date__gt=current_date)
         context['archive_rentals'] = Rental.objects.filter(end_date__lt=current_date)
+        context['from_list'] = self.request.GET.get('from_list', False)
         return context
+
 
 
 class ShiftCreateView(CreateView):
@@ -237,11 +246,25 @@ class ClientListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         clients = context['object_list']
+        for client in clients:
+            client.url = reverse('client_detail', args=[client.pk])
         return context
     # def get_queryset(self):
     #     queryset = super().get_queryset()
     #     client_filter = ClientFilter(self.request.GET, queryset=queryset)
     #     return client_filter.qs
+
+
+class ClientDetailView(DetailView):
+    model = Client
+    template_name = 'lists/client_detail.html'
+    context_object_name = 'client'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        client = self.get_object()
+        context['build_objects'] = client.build_objects.all()
+        return context
 
 
 class CustomLoginView(LoginView):
