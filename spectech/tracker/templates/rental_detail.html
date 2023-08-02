@@ -19,6 +19,60 @@
       </div>
     </div>
 
+    <!-- Новый столбец для файлов -->
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Файлы</h5>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Название документа</th>
+              <th>Загрузить</th>
+              <th>Скачать</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Договор</td>
+              <td>
+                <form id="contractForm" class="upload-form" action="{% url 'upload_documents' rental.pk %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  {{ document_form.contract_file }}
+                  <button type="submit" class="btn btn-primary">Загрузить</button>
+                </form>
+              </td>
+              <td>
+                {% if rental.contract_file %}
+                  <a href="{{ rental.contract_file.url }}" download>Скачать</a>
+                {% else %}
+                  Файл не загружен
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <!-- Повторить для других документов (счет, упд, эсм-7, путевой лист) -->
+              <td>Счет</td>
+              <td>
+                <form id="invoiceForm" class="upload-form" action="{% url 'upload_documents' rental.pk %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  {{ document_form.invoice_file }}
+                  <button type="submit" class="btn btn-primary">Загрузить</button>
+                </form>
+              </td>
+              <td>
+                {% if rental.invoice_file %}
+                  <a href="{{ rental.invoice_file.url }}" download>Скачать</a>
+                {% else %}
+                  Файл не загружен
+                {% endif %}
+              </td>
+            </tr>
+            <!-- Повторить для других документов -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Смены</h5>
@@ -54,9 +108,8 @@
     </button>
   </div>
 
-
   <!-- Модальное окно для добавления смены -->
- <div class="modal fade" id="addShiftModal" tabindex="-1" role="dialog" aria-labelledby="addShiftModalLabel"
+  <div class="modal fade" id="addShiftModal" tabindex="-1" role="dialog" aria-labelledby="addShiftModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -76,7 +129,8 @@
       </div>
     </div>
   </div>
-<style>
+
+  <style>
     /* Стили для кнопок */
     .btn-primary {
       background-color: #007bff;
@@ -119,6 +173,66 @@
           error: function (response) {
             // Обработка ошибок при добавлении смены
             // Здесь вы можете показать пользователю сообщение об ошибке или выполнить другую обработку ошибки
+            console.log(response.responseJSON.errors);
+          }
+        });
+      });
+    });
+  </script>
+
+  <script>
+$(document).ready(function () {
+    // Обработка отправки формы загрузки документа через AJAX
+    $('form[id^="contractForm"]').on('submit', function (event) {
+        event.preventDefault();
+        var form = $(this);
+        var formData = new FormData(form[0]);
+
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function (data) {
+                // Обновляем список документов на странице
+                var fileUrl = data.contract_file.file_url;
+                var fileName = data.contract_file.file_name;
+                var downloadLink = '<a href="' + fileUrl + '" download>' + fileName + '</a>';
+                form.closest('tr').find('.file-links').html(downloadLink);
+
+                // Очищаем форму загрузки документа после успешной загрузки
+                form[0].reset();
+            },
+            error: function (response) {
+                // Обработка ошибок при загрузке документа
+                // Здесь вы можете показать пользователю сообщение об ошибке или выполнить другую обработку ошибки
+                console.log(response.responseJSON.errors);
+            }
+        });
+    });
+});
+
+      // Обработка клика по кнопке скачивания документа через AJAX
+      $(document).on('click', '.download-btn', function (event) {
+        event.preventDefault();
+        var btn = $(this);
+        var fileUrl = btn.data('url');
+
+        $.ajax({
+          url: fileUrl,
+          type: 'GET',
+          dataType: 'text',
+          success: function (response) {
+            // Скачивание файла с браузера
+            var link = document.createElement('a');
+            link.href = fileUrl;
+            link.download = fileUrl.substr(fileUrl.lastIndexOf('/') + 1);
+            link.click();
+          },
+          error: function (response) {
+            // Обработка ошибок при скачивании файла
             console.log(response.responseJSON.errors);
           }
         });

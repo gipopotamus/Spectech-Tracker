@@ -186,7 +186,11 @@ class Rental(models.Model):  # аренда
     build_object = models.ForeignKey(BuildObject, verbose_name='объект', on_delete=models.CASCADE, blank=True,
                                      null=True)
 
-    # Дополнительные поля
+    contract_file = models.FileField(verbose_name='договор', upload_to='rental_files/', null=True, blank=True)
+    invoice_file = models.FileField(verbose_name='счет', upload_to='rental_files/', null=True, blank=True)
+    upd_file = models.FileField(verbose_name='упд', upload_to='rental_files/', null=True, blank=True)
+    esm7_file = models.FileField(verbose_name='эсм-7', upload_to='rental_files/', null=True, blank=True)
+    waybill_file = models.FileField(verbose_name='путевой лист', upload_to='rental_files/', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Аренду'

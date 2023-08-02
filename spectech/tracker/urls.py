@@ -1,6 +1,8 @@
 from django.urls import path
+
+from .services import upload_documents
 from .views import RentalCalendarView, RentalDetailView, RentalDeleteView, CarListView, CarDetailView, ClientListView, \
-    ShiftCreateView, RentalListView, logout_view, get_build_objects, ClientDetailView
+    ShiftCreateView, RentalListView, logout_view, ClientDetailView
 
 urlpatterns = [
     path('calendar/', RentalCalendarView.as_view(), name='rental_calendar'),
@@ -14,5 +16,6 @@ urlpatterns = [
     path('list/clients/<int:pk>/', ClientDetailView.as_view(), name='client_detail'),
     path('list/rentals', RentalListView.as_view(), name='rental_list'),
     path('logout/', logout_view, name='logout'),
+    path('rental/upload_documents/<int:pk>/', upload_documents, name='upload_documents'),
 ]
 

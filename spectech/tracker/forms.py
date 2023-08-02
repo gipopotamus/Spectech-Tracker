@@ -39,3 +39,11 @@ class RentalForm(forms.ModelForm):
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),
         }
+
+
+class DocumentForm(forms.Form):
+    contract_file = forms.FileField(required=False)
+    invoice_file = forms.FileField(required=False)
+    upd_file = forms.FileField(required=False)
+    esm7_file = forms.FileField(required=False)
+    waybill_file = forms.FileField(required=False)

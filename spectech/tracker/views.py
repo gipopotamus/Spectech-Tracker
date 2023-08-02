@@ -14,7 +14,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView, CreateView
 from django_redis import get_redis_connection
 import calendar as cal
-from .forms import RentalForm, ShiftForm
+from .forms import RentalForm, ShiftForm, DocumentForm
 from .models import Car, Rental, Shift, Client, BuildObject
 
 from datetime import timedelta
@@ -130,8 +130,6 @@ class RentalDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         rental = self.get_object()
-
-        # Рассчитываем общую оплату за каждую смену
         shifts = rental.shifts.annotate(
             total_hours=ExpressionWrapper(
                 ExtractHour(F('end_time') - F('start_time')),
@@ -142,19 +140,28 @@ class RentalDetailView(DetailView):
                 output_field=FloatField()  # Используем FloatField для оплаты смены
             )
         )
-
-        # Рассчитываем общую сумму оплаты за все смены
         total_salary = shifts.aggregate(total_salary=Sum('total_payment'))['total_salary'] or 0
         context['shift_form'] = ShiftForm(initial={'rental': self.object.pk})
         context['shifts'] = shifts
         context['total_salary'] = total_salary
-
+        context['document_form'] = DocumentForm()
         return context
 
-    def form_valid(self, form):
-        shift_form = ShiftForm(self.request.POST)
+    def post(self, request, *args, **kwargs):
+        rental = self.get_object()
+        document_form = DocumentForm(request.POST, request.FILES)
+        shift_form = ShiftForm(request.POST)
+        if document_form.is_valid():
+            # Обрабатываем каждый загружаемый файл отдельно
+            for field_name, file in request.FILES.items():
+                # Получаем соответствующее поле модели Rental по его имени
+                field = getattr(rental, field_name)
+
+                # Сохраняем файл в соответствующее поле модели Rental
+                field.save(file.name, file, save=True)
         if shift_form.is_valid():
             shift_form.save()
+
         return redirect('rental_info', pk=self.object.pk)
 
 
@@ -171,7 +178,6 @@ class RentalListView(ListView):
         context['archive_rentals'] = Rental.objects.filter(end_date__lt=current_date)
         context['from_list'] = self.request.GET.get('from_list', False)
         return context
-
 
 
 class ShiftCreateView(CreateView):
