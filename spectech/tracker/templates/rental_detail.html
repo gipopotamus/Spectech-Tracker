@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <a href="{% url 'rental_list' %}" class="btn btn-primary mb-3">Назад к списку</a>
+  <div class="card mb-3">
+    <div class="card-body">
+      <h4 class="card-title">Информация об аренде</h4>
+      <ul class="list-unstyled">
+        <li><strong>Клиент:</strong> {{ rental.client }}</li>
+        <li><strong>Спецтехника:</strong> {{ rental.car }}</li>
+        <li><strong>Владелец техники:</strong> {{ rental.car.owner }}</li>
+        <li><strong>Менеджер:</strong> {{ rental.manager.get_full_name }}</li>
+        <li><strong>Дата начала:</strong> {{ rental.start_date }}</li>
+        <li><strong>Дата конца:</strong> {{ rental.end_date }}</li>
+        <li><strong>Итоговая оплата:</strong> {{ total_salary }}</li>
+        <li><strong>Строительный объект:</strong> {{ rental.build_object }}</li>
+      </ul>
+    </div>
+  </div>
+
+
+<!-- Остальная часть шаблона -->
+
+ <h2>Upload Documents</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Название документа</th>
+        <th>Загрузить</th>
+        <th>Скачать</th>
+      </tr>
+    </thead>
+    <tbody>
+  <tr>
+    <td>Договор</td>
+    <td>
+      <form class="upload-form" action="{% url 'upload_documents' rental.pk %}" data-rental-pk="{{ rental.pk }}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ document_form.contract_file }}
+        <button type="submit" class="btn btn-primary">Загрузить</button>
+      </form>
+    </td>
+    <td class="file-links" id="contract-links">
+      {% if rental.contract_file %}
+        <a href="{{ rental.contract_file.url }}" download>Скачать</a>
+      {% else %}
+        Файл не загружен
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td>Путевой лист</td>
+    <td>
+      <form class="upload-form" action="{% url 'upload_documents' rental.pk %}" data-rental-pk="{{ rental.pk }}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ document_form.waybill_file }}
+        <button type="submit" class="btn btn-primary">Загрузить</button>
+      </form>
+    </td>
+    <td class="file-links" id="waybill_file-links">
+      {% if rental.waybill_file %}
+        <a href="{{ rental.waybill_file.url }}" download>Скачать</a>
+      {% else %}
+        Файл не загружен
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td>Счет</td>
+    <td>
+      <form class="upload-form" action="{% url 'upload_documents' rental.pk %}" data-rental-pk="{{ rental.pk }}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ document_form.invoice_file }}
+        <button type="submit" class="btn btn-primary">Загрузить</button>
+      </form>
+    </td>
+    <td class="file-links" id="invoice-links">
+      {% if rental.invoice_file %}
+        <a href="{{ rental.invoice_file.url }}" download>Скачать</a>
+      {% else %}
+        Файл не загружен
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td>УПД</td>
+    <td>
+      <form class="upload-form" action="{% url 'upload_documents' rental.pk %}" data-rental-pk="{{ rental.pk }}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ document_form.upd_file }}
+        <button type="submit" class="btn btn-primary">Загрузить</button>
+      </form>
+    </td>
+    <td class="file-links" id="upd-links">
+      {% if rental.upd_file %}
+        <a href="{{ rental.upd_file.url }}" download>Скачать</a>
+      {% else %}
+        Файл не загружен
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td>ЭСМ-7</td>
+    <td>
+      <form class="upload-form" action="{% url 'upload_documents' rental.pk %}" data-rental-pk="{{ rental.pk }}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ document_form.esm7_file }}
+        <button type="submit" class="btn btn-primary">Загрузить</button>
+      </form>
+    </td>
+    <td class="file-links" id="esm7-links">
+      {% if rental.esm7_file %}
+        <a href="{{ rental.esm7_file.url }}" download>Скачать</a>
+      {% else %}
+        Файл не загружен
+      {% endif %}
+    </td>
+  </tr>
+</tbody>
+
+  </table>
+
+<!-- Остальная часть шаблона -->
+
+
+
+
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Смены</h5>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Время</th>
+            <th>Оператор</th>
+            <th>Расход топлива</th>
+            <th>Заправлено топлива</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for shift in shifts %}
+            <tr>
+              <td>{{ shift.date }}</td>
+              <td>{{ shift.start_time}} - {{shift.end_time }}</td>
+              <td>{{ shift.worker }}</td>
+              <td>{{ shift.fuel_consumed }}</td>
+              <td>{{ shift.fuel_filled }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+    <button type="button" class="btn btn-primary mt-3" data-toggle="modal" data-target="#addShiftModal">
+      Добавить смену
+    </button>
+  </div>
+
+  <!-- Модальное окно для добавления смены -->
+<div class="modal fade" id="addShiftModal" tabindex="-1" role="dialog" aria-labelledby="addShiftModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addShiftModalLabel">Добавить смену</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="addShiftForm" action="{% url 'add_shift' rental.pk %}" method="post">
+          {% csrf_token %}
+          {{ shift_form.as_p }}
+          <button type="submit" class="btn btn-primary">Добавить</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Стили для кнопок */
+  .btn-primary {
+    background-color: #007bff;
+    color: #fff;
+  }
+
+  .btn-primary:hover,
+  .btn-primary:focus {
+    background-color: #0056b3;
+    color: #fff;
+  }
+
+  .btn-primary:active {
+    background-color: #0056b3;
+    color: #fff;
+    box-shadow: none;
+  }
+</style>
+
+
+<script>
+  // Обработка отправки формы добавления смены через AJAX
+  $(document).ready(function () {
+    $('#addShiftForm').on('submit', function (event) {
+      event.preventDefault();
+      var form = $(this);
+      var formData = form.serialize();
+
+      $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: formData,
+        dataType: 'json',
+        success: function (response) {
+          $('#addShiftModal').modal('hide');
+          location.reload();
+        },
+        error: function (response) {
+          console.log(response.responseJSON.errors);
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}
