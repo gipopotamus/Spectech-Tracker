@@ -1,36 +1,29 @@
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Rental
+from django.shortcuts import get_object_or_404, redirect
+from django.template.loader import render_to_string
+from django.views.decorators.http import require_http_methods
+
 from .forms import DocumentForm
+from .models import Rental
+from django.shortcuts import render
 
 
+from django.shortcuts import render
+
+
+@require_http_methods(["POST"])
 def upload_documents(request, pk):
     rental = get_object_or_404(Rental, pk=pk)
-    if request.method == 'POST':
-        document_form = DocumentForm(request.POST, request.FILES)
-        if document_form.is_valid():
-            # Сохраняем каждый загружаемый файл отдельно
-            for field_name, file in request.FILES.items():
-                # Получаем соответствующее поле модели Rental по его имени
-                field = getattr(rental, field_name)
-                # Сохраняем файл в соответствующее поле модели Rental
-                field.save(file.name, file, save=True)
+    document_form = DocumentForm(request.POST, request.FILES)
 
-            # Формируем словарь с информацией о загруженных документах
-            documents = {}
-            for field_name in document_form.fields.keys():
-                file_field = getattr(rental, field_name)
-                if file_field and file_field.url:
-                    documents[field_name] = {
-                        'file_url': file_field.url,
-                        'file_name': file_field.name.split('/')[-1],  # Получаем имя файла из URL
-                    }
+    if document_form.is_valid():
+        # Save each uploaded file separately
+        for field_name, file in request.FILES.items():
+            rental_field = getattr(rental, field_name)
+            rental_field.save(file.name, file, save=True)
 
-            # Возвращаем список документов в виде JSON-ответа
-            return JsonResponse(documents, safe=False)
-        else:
-            # Если форма невалидна, вернем ошибку с соответствующим статусом
-            return JsonResponse({'error': 'Форма невалидна'}, status=400)
+        # Redirect back to the rental detail page
+        return redirect('rental_detail', pk=pk)
 
-    # Если метод запроса не POST, вернем ошибку с соответствующим статусом
-    return JsonResponse({'error': 'Метод не поддерживается'}, status=405)
+    # If the form is invalid, simply render the rental detail page with the form errors
+    return render(request, 'rental_detail.html', {'rental': rental, 'document_form': document_form})

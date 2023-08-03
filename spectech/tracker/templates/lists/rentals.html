@@ -14,7 +14,7 @@
       </thead>
       <tbody>
         {% for rental in active_rentals %}
-          <tr onclick="window.location.href='{% url 'rental_detail' rental.id %}';" style="cursor: pointer;">>
+          <tr onclick="window.location.href='{% url 'rental_detail' rental.id %}';" style="cursor: pointer;">
             <td>{{ rental.client.name }}</td>
             <td>{{ rental.start_date }} - {{ rental.end_date }}</td>
             <td>{{ rental.car }}</td>
@@ -22,7 +22,7 @@
           </tr>
         {% endfor %}
        {% for rental in upcoming_rentals %}
-          <tr>
+          <tr onclick="window.location.href='{% url 'rental_detail' rental.id %}';" style="cursor: pointer;">
             <td>{{ rental.client.name }}</td>
             <td>{{ rental.start_date }} - {{ rental.end_date }}</td>
             <td>{{ rental.car }}</td>
@@ -46,7 +46,7 @@
       </thead>
       <tbody>
         {% for rental in archive_rentals %}
-          <tr class="text-muted">
+          <tr class="text-muted" onclick="window.location.href='{% url 'rental_detail' rental.id %}';" style="cursor: pointer;">
             <td>{{ rental.client.name }}</td>
             <td>{{ rental.start_date }} - {{ rental.end_date }}</td>
             <td>{{ rental.car }}</td>
