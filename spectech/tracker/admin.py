@@ -51,7 +51,7 @@ class CarAdmin(admin.ModelAdmin):
         (None, {'fields': ['name', 'model', 'number', 'car_type']}),
         ('Dates', {'fields': ['start_date', 'end_date']}),
         ('Details', {'fields': ['price', 'owner', 'fuel_consumption', 'leasing']}),
-        ('Additional', {
+        ('Тех.Информация', {
             'classes': ('collapse',),
             'fields': [
                 'year_of_manufacture',
