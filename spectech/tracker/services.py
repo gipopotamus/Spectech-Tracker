@@ -16,21 +16,14 @@ def upload_documents(request, pk):
                 # Сохраняем файл в соответствующее поле модели Rental
                 field.save(file.name, file, save=True)
 
-            # Формируем словарь с информацией о загруженных документах
-            documents = {}
-            for field_name in document_form.fields.keys():
-                file_field = getattr(rental, field_name)
-                if file_field and file_field.url:
-                    documents[field_name] = {
-                        'file_url': file_field.url,
-                        'file_name': file_field.name.split('/')[-1],  # Получаем имя файла из URL
-                    }
+            # После успешной загрузки документов, перенаправляем на страницу с деталями аренды
+            return redirect('rental_detail', pk=pk)  # Замените 'rental_detail' на ваш URL pattern
 
-            # Возвращаем список документов в виде JSON-ответа
-            return JsonResponse(documents, safe=False)
         else:
             # Если форма невалидна, вернем ошибку с соответствующим статусом
-            return JsonResponse({'error': 'Форма невалидна'}, status=400)
+            # и передадим параметры ошибки в URL для дальнейшего отображения на странице
+            error_params = "?error=invalid_form"
+            return redirect('rental_detail', pk=pk) + error_params  # Замените 'rental_detail' на ваш URL pattern
 
     # Если метод запроса не POST, вернем ошибку с соответствующим статусом
     return JsonResponse({'error': 'Метод не поддерживается'}, status=405)

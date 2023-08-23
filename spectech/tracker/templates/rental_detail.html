@@ -50,7 +50,6 @@
               </td>
             </tr>
             <tr>
-              <!-- Повторить для других документов (счет, упд, эсм-7, путевой лист) -->
               <td>Счет</td>
               <td>
                 <form id="invoiceForm" class="upload-form" action="{% url 'upload_documents' rental.pk %}" method="post" enctype="multipart/form-data">
@@ -67,7 +66,65 @@
                 {% endif %}
               </td>
             </tr>
-            <!-- Повторить для других документов -->
+            <tr>
+              <td>УПД</td>
+              <td>
+                <form id="updForm" class="upload-form" action="{% url 'upload_documents' rental.pk %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  {{ document_form.upd_file }}
+                  <button type="submit" class="btn btn-primary">Загрузить</button>
+                </form>
+              </td>
+              <td>
+                <div class="file-links">
+                  {% if rental.upd_file %}
+                    <a href="{{ rental.upd_file.url }}" class="download-btn" data-url="{{ rental.upd_file.url }}" download>Скачать</a>
+                  {% else %}
+                    Файл не загружен
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>ЭСМ-7</td>
+              <td>
+                <form id="esm7Form" class="upload-form" action="{% url 'upload_documents' rental.pk %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  {{ document_form.esm7_file }}
+                  <button type="submit" class="btn btn-primary">Загрузить</button>
+                </form>
+              </td>
+              <td>
+                <div class="file-links">
+                  {% if rental.esm7_file %}
+                    <a href="{{ rental.esm7_file.url }}" class="download-btn" data-url="{{ rental.esm7_file.url }}" download>Скачать</a>
+                  {% else %}
+                    Файл не загружен
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>Путевой лист</td>
+              <td>
+                <form id="waybillForm" class="upload-form" action="{% url 'upload_documents' rental.pk %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  {{ document_form.waybill_file }}
+                  <button type="submit" class="btn btn-primary">Загрузить</button>
+                </form>
+              </td>
+              <td>
+                <div class="file-links">
+                  {% if rental.waybill_file %}
+                    <a href="{{ rental.waybill_file.url }}" class="download-btn" data-url="{{ rental.waybill_file.url }}" download>Скачать</a>
+                  {% else %}
+                    Файл не загружен
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
