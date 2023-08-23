@@ -19,8 +19,8 @@ class CarInline(admin.TabularInline):
 
 
 class OwnerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'owner_type', 'INN']
-    search_fields = ['name', 'INN']
+    list_display = ['name', 'owner_type', 'inn']
+    search_fields = ['name', 'inn']
     inlines = [CarInline]
 
 
