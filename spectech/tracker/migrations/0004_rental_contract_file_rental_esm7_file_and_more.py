@@ -5,6 +5,9 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
+    dependencies = [
+        ('tracker', '0003_rental_build_object'),
+    ]
 
     operations = [
         migrations.AlterField(
