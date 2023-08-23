@@ -59,7 +59,7 @@
     <form method="post" action="{% url 'rental_create' %}">
         {% csrf_token %}
         <div class="form-group row">
-            <label for="car" class="col-md-2 col-form-label">Автомобиль:</label>
+            <label for="car" class="col-md-2 col-form-label">Техника:</label>
             <div class="col-md-10">
                 {{ form.car }}
                 {% if form.car.errors %}

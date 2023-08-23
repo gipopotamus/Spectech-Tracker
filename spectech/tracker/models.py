@@ -90,7 +90,7 @@ class Car(models.Model):  # техника
         verbose_name_plural = 'Техника'
 
     def __str__(self):
-        return f"{self.car_type.name} - {self.id}"
+        return f"{self.car_type.name} - {self.number}"
 
 
 class Worker(models.Model):  # рабочий-оператор
