@@ -10,7 +10,7 @@ class ShiftForm(forms.ModelForm):
         model = Shift
         fields = ('worker', 'date', 'start_time', 'end_time', 'fuel_filled', 'fuel_consumed')
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date', 'min': timezone.now().strftime('%Y-%m-%d')}),
+            'date': forms.DateInput(attrs={'type': 'date'}),
             'start_time': forms.TimeInput(attrs={'type': 'time'}),
             'end_time': forms.TimeInput(attrs={'type': 'time'}),
         }
