@@ -42,6 +42,8 @@ services:
       context: ./docker/nginx/
     container_name: spectech_nginx
     image: spectech_nginx
+    environment:
+      - CLIENT_MAX_BODY_SIZE=20m
     volumes:
       - static_volume:/spectech/static
       - media_volume:/spectech/media
