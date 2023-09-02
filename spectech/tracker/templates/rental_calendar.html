@@ -60,11 +60,20 @@
         {% csrf_token %}
         <div class="form-group row">
             <label for="car" class="col-md-2 col-form-label">Техника:</label>
-            <div class="col-md-10">
+            <div class="col-md-4">
                 {{ form.car }}
                 {% if form.car.errors %}
                     <div class="invalid-feedback">
                         {{ form.car.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <label for="manager" class="col-md-2 col-form-label">Менеджер:</label>
+            <div class="col-md-4">
+                {{ form.manager }}
+                {% if form.manager.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.manager.errors }}
                     </div>
                 {% endif %}
             </div>
@@ -81,16 +90,25 @@
             </div>
         </div>
         <div class="form-group row">
-            <label for="manager" class="col-md-2 col-form-label">Менеджер:</label>
+            <label for="tariff" class="col-md-2 col-form-label">Тариф:</label>
             <div class="col-md-4">
-                {{ form.manager }}
-                {% if form.manager.errors %}
+                {{ form.tariff }}
+                {% if form.tariff.errors %}
                     <div class="invalid-feedback">
-                        {{ form.manager.errors }}
+                        {{ form.tariff.errors }}
                     </div>
                 {% endif %}
             </div>
+            <label for="extra_tariff" class="col-md-2 col-form-label">Экстра тариф:</label>
+            <div class="col-md-4">
+                {{ form.extra_tariff }}
+                {% if form.extra_tariff.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.extra_tariff.errors }}
+                    </div>
+                {% endif %}
             </div>
+        </div>
         <div class="form-group row">
             <label for="start_date" class="col-md-2 col-form-label">Дата начала:</label>
             <div class="col-md-4">
@@ -101,8 +119,6 @@
                     </div>
                 {% endif %}
             </div>
-        </div>
-        <div class="form-group row">
             <label for="end_date" class="col-md-2 col-form-label">Дата окончания:</label>
             <div class="col-md-4">
                 {{ form.end_date }}

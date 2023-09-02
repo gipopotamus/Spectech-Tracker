@@ -1,5 +1,3 @@
-import json
-
 from django.contrib.auth import logout
 from django.db import models
 from django.contrib.auth.views import LoginView
@@ -12,12 +10,11 @@ from django.utils import timezone
 from django.utils.datetime_safe import datetime
 from django.views import View
 from django.views.generic import DetailView, ListView, CreateView
-from django_redis import get_redis_connection
 import calendar as cal
 from .forms import RentalForm, ShiftForm, DocumentForm
 from .models import Car, Rental, Shift, Client, BuildObject
-
 from datetime import timedelta
+from .services import generate_excel, CalendarService
 
 
 class RentalCalendarView(View):
@@ -29,69 +26,33 @@ class RentalCalendarView(View):
         last_day = last_day.replace(day=1) - timedelta(days=1)
         return first_day, last_day
 
-    def get_context_data(self):
-        # Получаем текущую дату
-        today = timezone.now().date()
-
-        # Получаем выбранную дату из формы, если не выбрана, то используем текущий месяц
-        selected_month = self.request.GET.get('month')
-        if selected_month:
-            selected_date = timezone.datetime.strptime(selected_month, '%Y-%m').date()
-        else:
-            selected_date = today.replace(day=1)
-
-        first_day_of_month, last_day_of_month = self.get_first_and_last_day_of_month(selected_date)
-        num_days_in_month = cal.monthrange(selected_date.year, selected_date.month)[1]
-
-        redis_conn = get_redis_connection()
-        cache_key = f"rental_calendar_{selected_month}"
-        calendar = redis_conn.get(cache_key)
-
-        if calendar:
-            booked_dates = json.loads(calendar)
-        else:
-            # Если данных в кэше нет, то генерируем и кэшируем их
-            rentals = Rental.objects.filter(
-                end_date__gte=first_day_of_month,
-                start_date__lte=last_day_of_month
-            )
-            booked_dates = {}
-            cars = Car.objects.all()
-            for car in cars:
-                booked_dates[car.name] = []
-
-            for rental in rentals:
-                car_name = rental.car.name
-                rental_data = {
-                    rental.id: [rental.client.name, [date.strftime('%m-%d') for date in
-                                                     (rental.start_date + timedelta(days=i) for i in
-                                                      range((rental.end_date - rental.start_date).days + 1))]]
-                }
-                booked_dates[car_name].append(rental_data)
-            redis_conn.set(cache_key, json.dumps(booked_dates), 3600)
-
-        return {
-            'dates': [(selected_date + timedelta(days=i)).strftime('%m-%d') for i in range(num_days_in_month)],
-            'booked_dates': booked_dates,
-            'form': RentalForm(),
-            'selected_month': selected_date.strftime('%Y-%m'),
-        }
-
     def get(self, request, *args, **kwargs):
         selected_month = self.request.GET.get('month')
         if not selected_month:
             current_month = timezone.now().strftime('%Y-%m')
             return redirect(reverse('rental_calendar') + f'?month={current_month}')
-        context = self.get_context_data()
+
+        booked_dates = CalendarService.get_booked_dates(selected_month)
+
+        selected_date = timezone.datetime.strptime(selected_month, '%Y-%m').date()
+        num_days_in_month = cal.monthrange(selected_date.year, selected_date.month)[1]
+
+        context = {
+            'dates': [(selected_date + timedelta(days=i)).strftime('%m-%d') for i in range(num_days_in_month)],
+            'booked_dates': booked_dates,
+            'form': RentalForm(),
+            'selected_month': selected_date.strftime('%Y-%m'),
+        }
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         form = RentalForm(request.POST)
+        selected_month = self.request.GET.get('month')
         if form.is_valid():
             rental = form.save()
             return redirect('rental_calendar')
         else:
-            context = self.get_context_data()
+            context = self.get_context_data(selected_month)
             context['form'] = form
             return render(request, self.template_name, context)
 
@@ -286,3 +247,21 @@ class CustomLoginView(LoginView):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+
+def special_equipment_info(request):
+    if request.method == 'POST':
+        selected_month = request.POST.get('selected_month')
+        try:
+            selected_date = datetime.strptime(selected_month, '%Y-%m')
+        except ValueError:
+            selected_date = datetime.now()
+
+        # Генерируем и загружаем Excel-файл
+        response = generate_excel(request, selected_date)  # Передаем объект запроса и выбранный месяц
+        return response
+
+    else:
+        selected_date = datetime.now()
+
+    return render(request, 'special_equipment_info.html', {'selected_month': selected_date.strftime('%Y-%m')})

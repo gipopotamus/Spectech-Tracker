@@ -7,13 +7,13 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django_redis import get_redis_connection
 
-
 User = get_user_model()
 
 
-class Owner(models.Model):  # владелец
-    owner_type = models.CharField('тип владельца', max_length=20)
-    name = models.CharField('наименование', max_length=20)
+# Модель для хранения информации о владельце техники
+class Owner(models.Model):
+    owner_type = models.CharField('Тип владельца', max_length=20)
+    name = models.CharField('Наименование', max_length=20)
     inn = models.CharField('ИНН', max_length=20)
 
     def __str__(self):
@@ -24,8 +24,9 @@ class Owner(models.Model):  # владелец
         verbose_name_plural = 'Владельцы'
 
 
+# Модель для хранения информации о типе техники
 class CarType(models.Model):
-    name = models.CharField('наименование', max_length=100)
+    name = models.CharField('Наименование', max_length=100)
 
     class Meta:
         verbose_name = 'Тип техники'
@@ -35,11 +36,12 @@ class CarType(models.Model):
         return self.name
 
 
+# Модель для хранения информации о лизинге
 class Leasing(models.Model):
-    bank = models.CharField('банк', max_length=100)
-    amount = models.DecimalField('сумма', max_digits=10, decimal_places=2)
-    term = models.IntegerField('срок')
-    monthly_payment_date = models.PositiveIntegerField('дата ежемесячного погашения')
+    bank = models.CharField('Банк', max_length=100)
+    amount = models.DecimalField('Сумма', max_digits=10, decimal_places=2)
+    term = models.IntegerField('Срок')
+    monthly_payment_date = models.PositiveIntegerField('Дата ежемесячного погашения')
 
     class Meta:
         verbose_name = 'Лизинг'
@@ -49,41 +51,44 @@ class Leasing(models.Model):
         return f"{self.bank} - {self.amount}"
 
 
+# Модель для хранения информации о страховке
 class Insurance(models.Model):
-    osago_number = models.CharField('номер ОСАГО', max_length=100, blank=True, null=True)
-    osago_expiry_date = models.DateField('действует до (ОСАГО)', blank=True, null=True)
-    kasko_number = models.CharField('номер КАСКО', max_length=100, blank=True, null=True)
-    kasko_expiry_date = models.DateField('действует до (КАСКО)', blank=True, null=True)
-    car = models.ForeignKey('Car', verbose_name='техника', on_delete=models.CASCADE)
+    osago_number = models.CharField('Номер ОСАГО', max_length=100, blank=True, null=True)
+    osago_expiry_date = models.DateField('Действует до (ОСАГО)', blank=True, null=True)
+    kasko_number = models.CharField('Номер КАСКО', max_length=100, blank=True, null=True)
+    kasko_expiry_date = models.DateField('Действует до (КАСКО)', blank=True, null=True)
+    car = models.ForeignKey('Car', verbose_name='Техника', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Страховка'
         verbose_name_plural = 'Страховки'
 
 
-class Car(models.Model):  # техника
-    name = models.CharField('наименование', max_length=100)
-    model = models.CharField('модель', max_length=100)
-    number = models.CharField('номер', max_length=9)
-    start_date = models.DateField('дата начала', default=timezone.now)
-    end_date = models.DateField('дата окончания', blank=True, null=True)
-    price = models.IntegerField('цена')
-    owner = models.ForeignKey(Owner, verbose_name='владелец', on_delete=models.CASCADE)
-    fuel_consumption = models.DecimalField('расход топлива', max_digits=10, decimal_places=2)
-    leasing = models.OneToOneField(Leasing, verbose_name='лизинг', blank=True, null=True, on_delete=models.SET_NULL)
-    car_type = models.ForeignKey(CarType, verbose_name='тип техники', on_delete=models.CASCADE)
+# Модель для хранения информации о технике
+class Car(models.Model):
+    name = models.CharField('Наименование', max_length=100)
+    model = models.CharField('Модель', max_length=100)
+    number = models.CharField('Номер', max_length=9)
+    start_date = models.DateField('Дата начала', default=timezone.now)
+    end_date = models.DateField('Дата окончания', blank=True, null=True)
+    price = models.IntegerField('Цена')
+    owner = models.ForeignKey(Owner, verbose_name='Владелец', on_delete=models.CASCADE)
+    fuel_consumption = models.DecimalField('Расход топлива', max_digits=10, decimal_places=2)
+    leasing = models.OneToOneField(Leasing, verbose_name='Лизинг', blank=True, null=True, on_delete=models.SET_NULL)
+    car_type = models.ForeignKey(CarType, verbose_name='Тип техники', on_delete=models.CASCADE)
+    work_mode = models.CharField(verbose_name='Доп. режим работы', blank=True, null=True, max_length=5)
 
     # Дополнительные поля
-    year_of_manufacture = models.PositiveIntegerField('год выпуска', blank=True, null=True)
+    year_of_manufacture = models.PositiveIntegerField('Год выпуска', blank=True, null=True)
     vin = models.CharField('VIN', max_length=17, blank=True, null=True)
-    chassis_number = models.CharField('номер шасси', max_length=100, blank=True, null=True)
-    body_number = models.CharField('номер кузова', max_length=100, blank=True, null=True)
-    engine_number = models.CharField('номер двигателя', max_length=100, blank=True, null=True)
-    engine_volume = models.CharField('объем', max_length=50, blank=True, null=True)
-    fuel_type = models.CharField('тип топлива', max_length=50, blank=True, null=True)
-    fuel_card_number = models.CharField('номер топливной карты', max_length=50, blank=True, null=True)
+    chassis_number = models.CharField('Номер шасси', max_length=100, blank=True, null=True)
+    body_number = models.CharField('Номер кузова', max_length=100, blank=True, null=True)
+    engine_number = models.CharField('Номер двигателя', max_length=100, blank=True, null=True)
+    engine_volume = models.CharField('Объем', max_length=50, blank=True, null=True)
+    fuel_type = models.CharField('Тип топлива', max_length=50, blank=True, null=True)
+    fuel_card_number = models.CharField('Номер топливной карты', max_length=50, blank=True, null=True)
     inspection_number = models.CharField('Номер ТО', max_length=50, blank=True, null=True)
-    inspection_expiry_date = models.DateField('срок действия ТО', blank=True, null=True)
+    inspection_expiry_date = models.DateField('Срок действия ТО', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Технику'
@@ -93,11 +98,12 @@ class Car(models.Model):  # техника
         return f"{self.car_type.name} - {self.number}"
 
 
-class Worker(models.Model):  # рабочий-оператор
-    full_name = models.CharField('полное имя', max_length=50)
-    mobile_numer = models.CharField('мобильный номер', max_length=50)
-    hourly_rate = models.DecimalField('почасовая ставка', max_digits=10, decimal_places=2)
-    passport = models.CharField('паспорт', max_length=50)
+# Модель для хранения информации о рабочих-операторах
+class Worker(models.Model):
+    full_name = models.CharField('Полное имя', max_length=50)
+    mobile_numer = models.CharField('Мобильный номер', max_length=50)
+    hourly_rate = models.DecimalField('Почасовая ставка', max_digits=10, decimal_places=2)
+    passport = models.CharField('Паспорт', max_length=50)
 
     class Meta:
         verbose_name = 'Оператора'
@@ -107,10 +113,12 @@ class Worker(models.Model):  # рабочий-оператор
         return self.full_name
 
 
+# Модель для хранения информации об объектах строительства
 class BuildObject(models.Model):
-    name = models.CharField('название объекта', max_length=100)
-    address = models.CharField('адрес объекта', max_length=200)
-    client = models.ForeignKey('Client', verbose_name='клиент', on_delete=models.CASCADE)
+    name = models.CharField('Название объекта', max_length=100)
+    address = models.CharField('Адрес объекта', max_length=200)
+    client = models.ForeignKey('Client', verbose_name='Клиент', on_delete=models.CASCADE)
+
     class Meta:
         verbose_name = 'Объект'
         verbose_name_plural = 'Объекты'
@@ -119,11 +127,13 @@ class BuildObject(models.Model):
         return self.name
 
 
+# Модель для хранения информации о клиентах
 class Client(PolymorphicModel):
-    name = models.CharField('имя/название огранизации', max_length=50)
-    email = models.EmailField('email')
-    phone = models.CharField('телефон', max_length=15)
+    name = models.CharField('Имя/Название огранизации', max_length=50)
+    email = models.EmailField('Email')
+    phone = models.CharField('Телефон', max_length=15)
 
+    # Поля для реализации полиморфизма
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, editable=False, null=True)
     object_id = models.PositiveIntegerField(editable=False, null=True)
     content_object = GenericForeignKey('content_type', 'object_id')
@@ -135,6 +145,7 @@ class Client(PolymorphicModel):
     def __str__(self):
         return f"{self.name} - {self.get_client_type()}"
 
+    # Метод для получения типа клиента
     def get_client_type(self):
         return self.content_type
 
@@ -147,8 +158,9 @@ class Client(PolymorphicModel):
         super().save(*args, **kwargs)
 
 
+# Модель для хранения информации о физических лицах
 class IndividualClient(Client):
-    passport = models.CharField('паспорт', max_length=12)
+    passport = models.CharField('Паспорт', max_length=12)
 
     class Meta:
         verbose_name = 'Физическое лицо'
@@ -161,8 +173,9 @@ class IndividualClient(Client):
         return "Физическое лицо"
 
 
+# Модель для хранения информации о юридических лицах
 class LegalClient(Client):
-    reprasintative_name = models.CharField('имя представителя', max_length=100)
+    reprasintative_name = models.CharField('Имя представителя', max_length=100)
     vat_number = models.CharField('ИНН', max_length=20)
 
     class Meta:
@@ -176,21 +189,22 @@ class LegalClient(Client):
         return "Юридическое лицо"
 
 
-class Rental(models.Model):  # аренда
-    client = models.ForeignKey(Client, verbose_name='клиент', on_delete=models.CASCADE)
-    car = models.ForeignKey(Car, verbose_name='техника', on_delete=models.CASCADE)
-    start_date = models.DateField('дата начала')
-    end_date = models.DateField('дата окончания')
-    manager = models.ForeignKey(User, verbose_name='менеджер', on_delete=models.CASCADE)
-    tariff = models.ForeignKey('Tariff', verbose_name='тариф', on_delete=models.CASCADE, blank=True, null=True)
-    build_object = models.ForeignKey(BuildObject, verbose_name='объект', on_delete=models.CASCADE, blank=True,
-                                     null=True)
+# Модель для хранения информации об аренде
+class Rental(models.Model):
+    client = models.ForeignKey(Client, verbose_name='Клиент', on_delete=models.CASCADE)
+    car = models.ForeignKey(Car, verbose_name='Техника', on_delete=models.CASCADE)
+    start_date = models.DateField('Дата начала')
+    end_date = models.DateField('Дата окончания')
+    manager = models.ForeignKey(User, verbose_name='Менеджер', on_delete=models.CASCADE)
+    build_object = models.ForeignKey(BuildObject, verbose_name='Объект', on_delete=models.CASCADE, blank=True, null=True)
+    tariff = models.IntegerField('Цена(час)', blank=True, null=True)
+    extra_tariff = models.IntegerField('Цена(доп.режим работы)', blank=True, null=True)
 
-    contract_file = models.FileField(verbose_name='договор', upload_to='rental_files/', null=True, blank=True)
-    invoice_file = models.FileField(verbose_name='счет', upload_to='rental_files/', null=True, blank=True)
-    upd_file = models.FileField(verbose_name='упд', upload_to='rental_files/', null=True, blank=True)
-    esm7_file = models.FileField(verbose_name='эсм-7', upload_to='rental_files/', null=True, blank=True)
-    waybill_file = models.FileField(verbose_name='путевой лист', upload_to='rental_files/', null=True, blank=True)
+    contract_file = models.FileField(verbose_name='Договор', upload_to='rental_files/', null=True, blank=True)
+    invoice_file = models.FileField(verbose_name='Счет', upload_to='rental_files/', null=True, blank=True)
+    upd_file = models.FileField(verbose_name='УПД', upload_to='rental_files/', null=True, blank=True)
+    esm7_file = models.FileField(verbose_name='ЭСМ-7', upload_to='rental_files/', null=True, blank=True)
+    waybill_file = models.FileField(verbose_name='Путевой лист', upload_to='rental_files/', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Аренду'
@@ -207,6 +221,7 @@ class Rental(models.Model):  # аренда
         super().delete(*args, **kwargs)
         self.clear_cache()
 
+    # Метод для очистки кэша
     def clear_cache(self):
         redis_conn = get_redis_connection()
         current_date = self.start_date
@@ -216,14 +231,16 @@ class Rental(models.Model):  # аренда
             current_date += relativedelta(months=1)
 
 
-class Shift(models.Model):  # смена
-    worker = models.ForeignKey(Worker, verbose_name='рабочий', on_delete=models.CASCADE)
-    fuel_filled = models.DecimalField('заправленное топливо', max_digits=10, decimal_places=2)
-    fuel_consumed = models.DecimalField('расход топлива', max_digits=10, decimal_places=2)
+# Модель для хранения информации о сменах
+class Shift(models.Model):
+    worker = models.ForeignKey(Worker, verbose_name='Рабочий', on_delete=models.CASCADE)
+    fuel_filled = models.DecimalField('Заправленное топливо', max_digits=10, decimal_places=2)
+    fuel_consumed = models.DecimalField('Расход топлива', max_digits=10, decimal_places=2)
     date = models.DateField()  # Добавляем поле даты
-    start_time = models.TimeField(verbose_name='время начала')  # Поле времени начала
-    end_time = models.TimeField(verbose_name='время окончания')  # Поле времени окончания
-    rental = models.ForeignKey(Rental, related_name='shifts', verbose_name='аренда', on_delete=models.CASCADE)
+    start_time = models.TimeField(verbose_name='Время начала')  # Поле времени начала
+    end_time = models.TimeField(verbose_name='Время окончания')  # Поле времени окончания
+    rental = models.ForeignKey(Rental, related_name='shifts', verbose_name='Аренда', on_delete=models.CASCADE)
+    is_additional_mode = models.BooleanField('Дополнительный режим', default=False)
 
     def __str__(self):
         return f"Смена {self.worker}"
@@ -231,23 +248,3 @@ class Shift(models.Model):  # смена
     class Meta:
         verbose_name = 'Смену'
         verbose_name_plural = 'Смены'
-
-
-class Tariff(models.Model):
-    name = models.CharField('название тарифа', max_length=100)
-    min_days = models.PositiveIntegerField('минимальное количество дней')
-    max_days = models.PositiveIntegerField('максимальное количество дней')
-    price = models.DecimalField('цена', max_digits=10, decimal_places=2)
-
-    class Meta:
-        verbose_name = 'Тариф'
-        verbose_name_plural = 'Тарифы'
-
-    def __str__(self):
-        return self.name
-
-# class Accounting(models.Model): #
-#     date = models.DateField()
-#     amount = models.DecimalField(max_digits=10, decimal_places=2)
-#     # Дополнительные поля
-

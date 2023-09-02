@@ -27,13 +27,15 @@ class ShiftForm(forms.ModelForm):
 class RentalForm(forms.ModelForm):
     class Meta:
         model = Rental
-        fields = ['client', 'car', 'start_date', 'end_date', 'manager', 'build_object']
+        fields = ['client', 'car', 'start_date', 'end_date', 'manager', 'build_object', 'tariff', 'extra_tariff']
         labels = {
             'client': 'Клиент',
             'car': 'Техника',
             'start_date': 'Дата начала',
             'end_date': 'Дата окончания',
-            'build_object': 'объект'
+            'build_object': 'объект',
+            'tariff': 'Цена',
+            'extra_tariff': 'Цена за дополнительный режим'
         }
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}),

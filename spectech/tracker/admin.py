@@ -6,7 +6,7 @@ from django.utils.html import format_html
 from django_redis import get_redis_connection
 
 from .models import Owner, Leasing, CarType, Car, Worker, BuildObject, Shift, Rental, Insurance, IndividualClient, \
-    LegalClient, Tariff, Client
+    LegalClient, Client
 
 
 class CarInline(admin.TabularInline):
@@ -42,7 +42,8 @@ class InsuranceInline(admin.StackedInline):
 
 
 class CarAdmin(admin.ModelAdmin):
-    list_display = ['name', 'model', 'car_type', 'number', 'start_date', 'end_date', 'price', 'owner', 'leasing']
+    list_display = ['name', 'model', 'car_type', 'number', 'start_date', 'end_date', 'price', 'owner',
+                    'leasing', 'work_mode']
     list_filter = ['leasing']
     search_fields = ['name', 'model', 'number', 'car_type']
     autocomplete_fields = ['owner']
@@ -64,6 +65,7 @@ class CarAdmin(admin.ModelAdmin):
                 'fuel_card_number',
                 'inspection_number',
                 'inspection_expiry_date',
+                'work_mode',
             ],
         }),
     ]
@@ -135,10 +137,6 @@ class ShiftAdmin(admin.ModelAdmin):
     autocomplete_fields = ['worker']
 
 
-class TariffAdmin(admin.ModelAdmin):
-    search_fields = ['name']  # Добавьте поле для поиска тарифов
-
-
 class ShiftInline(admin.TabularInline):
     model = Shift
     extra = 0
@@ -146,9 +144,9 @@ class ShiftInline(admin.TabularInline):
 
 
 class RentalAdmin(admin.ModelAdmin):
-    list_display = ['client', 'car', 'start_date', 'end_date', 'tariff']
+    list_display = ['client', 'car', 'start_date', 'end_date']
     list_filter = ['start_date', 'end_date']
-    autocomplete_fields = ['client', 'car', 'tariff']
+    autocomplete_fields = ['client', 'car']
     inlines = [ShiftInline]
 
     def save_model(self, request, obj, form, change):
@@ -179,6 +177,5 @@ admin.site.register(Worker, WorkerAdmin)
 admin.site.register(BuildObject, BuildObjectAdmin)
 admin.site.register(Shift, ShiftAdmin)
 admin.site.register(Rental, RentalAdmin)
-admin.site.register(Tariff, TariffAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.site_header = 'Панель администратора'
