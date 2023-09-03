@@ -8,7 +8,7 @@ from .models import Rental, Shift
 class ShiftForm(forms.ModelForm):
     class Meta:
         model = Shift
-        fields = ('worker', 'date', 'start_time', 'end_time', 'fuel_filled', 'fuel_consumed')
+        fields = ('worker', 'date', 'start_time', 'end_time', 'fuel_filled', 'fuel_consumed', 'is_additional_mode')
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
             'start_time': forms.TimeInput(attrs={'type': 'time'}),

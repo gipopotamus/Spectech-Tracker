@@ -1,6 +1,8 @@
 import json
 from datetime import timedelta
-from openpyxl.styles import Font, Border, Side, PatternFill
+import openpyxl
+from django.db.models import Q
+from openpyxl.styles import Font, Border, Side, PatternFill, NamedStyle, Alignment
 from openpyxl.utils import get_column_letter
 from openpyxl import Workbook
 from django.http import JsonResponse, HttpResponse
@@ -40,8 +42,6 @@ def upload_documents(request, pk):
 def generate_excel(request, selected_date):
     start_date = selected_date.replace(day=1)
     end_date = start_date.replace(month=start_date.month % 12 + 1, day=1)
-
-    # Get the number of days in the selected month
     _, num_days = calendar.monthrange(selected_date.year, selected_date.month)
 
     # Create a new Excel workbook
@@ -53,11 +53,12 @@ def generate_excel(request, selected_date):
     bold_font = Font(bold=True)
 
     # Set fill styles
-    green_fill = PatternFill(start_color="00FF00", end_color="00FF00", fill_type="solid")
+    green_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
     red_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+    blue_fill = PatternFill(start_color="BDD7EE", end_color="BDD7EE", fill_type="solid")
 
     # Add headers with styles
-    headers = ['Номер', 'Техника', 'Тариф', 'Наименование и адрес объекта']
+    headers = ['Номер', 'Техника', 'объект', 'Тариф', 'Доп. тариф']
     for day in range(1, num_days + 1):
         headers.append(day)
     headers += ['количество часов', 'всего (р.)']
@@ -65,79 +66,83 @@ def generate_excel(request, selected_date):
     for cell in ws[1]:
         cell.font = bold_font
 
-    # Fetch data and populate rows
-    cars = Car.objects.all()
-    row_number = 1
+    # Получаем данные об арендах и сменах
+    rentals = Rental.objects.filter(Q(start_date__lte=end_date) & Q(end_date__gte=start_date))
+    shifts = Shift.objects.filter(rental__in=rentals)
+    all_cars = Car.objects.all()
 
-    for car in cars:
-        shifts = Shift.objects.filter(rental__car=car, date__range=(start_date, end_date))
-        shifts_by_day = {shift.date.day: shift for shift in shifts}
+    # Получаем список машин, для которых есть подходящие аренды в выбранном месяце
+    cars_with_rentals = rentals.values_list('car', flat=True).distinct()
 
-        for shift in shifts:
-            row_data = [row_number, car.name]
-            if shift.rental.tariff:
-                row_data.append(shift.rental.tariff.hourly_rate)
-            else:
-                row_data.append('')
-            row_data.append(shift.rental.build_object.name if shift.rental.build_object else '')
-            total_hours = 0
-            total_income = 0
+    # Отфильтровываем машины, для которых нет подходящих аренд
+    cars_without_rentals = all_cars.exclude(id__in=cars_with_rentals)
 
-            for day in range(1, num_days + 1):
-                day_shift = shifts_by_day.get(day)
-                if day_shift and day_shift.rental == shift.rental:
-                    hours = (day_shift.end_time.hour - day_shift.start_time.hour) + (
-                            day_shift.end_time.minute - day_shift.start_time.minute) / 60
-                    total_hours += hours
-                    total_income += hours * (shift.rental.tariff.hourly_rate if shift.rental.tariff else 2)
-                    row_data.append(hours)
-                    if hours > 0:
-                        row_data[-1] = hours  # Set green fill for cells with hours
+    shifts_dict = {}
+    for shift in shifts:
+        key = (shift.rental_id, shift.date)
+        shifts_dict.setdefault(key, []).append(shift)
+
+    # Начинаем заполнять таблицу данными
+    current_row = 2
+    for rental in rentals:
+        total_hours = 0
+        total_amount = 0
+        # Заполняем данные аренды
+        ws.cell(row=current_row, column=1, value=rental.id)
+        ws.cell(row=current_row, column=2, value=rental.car.name)
+        ws.cell(row=current_row, column=3, value=rental.build_object.name if rental.build_object else '')
+        ws.cell(row=current_row, column=4, value=rental.tariff if rental.tariff else '')
+        ws.cell(row=current_row, column=5, value=rental.extra_tariff if rental.extra_tariff else '')
+
+        # Перебираем дни месяца
+        current_date = start_date
+        while current_date <= end_date:
+            hours_worked = 0
+            day_amount = 0
+            if rental.start_date <= current_date.date() <= rental.end_date:
+                temp_shift = shifts_dict.get((rental.id, current_date.date()))
+                if temp_shift:
+                    for a in temp_shift:
+                        start_time = a.start_time
+                        end_time = a.end_time
+                        hours = (end_time.hour - start_time.hour) + (end_time.minute - start_time.minute) / 60
+                        day_amount += hours * rental.extra_tariff if a.is_additional_mode else hours * rental.tariff
+                        hours_worked += hours
+                    if any(_.is_additional_mode for _ in temp_shift):
+                        cell = ws.cell(row=current_row, column=current_date.day + 5)
+                        cell.value = hours_worked
+                        cell.fill = blue_fill  # Синий
+                    else:
+                        ws.cell(row=current_row, column=current_date.day + 5, value=hours_worked)
+                        cell = ws.cell(row=current_row, column=current_date.day + 5)
+                        cell.fill = green_fill  # Зеленый
                 else:
-                    row_data.append(0)
-            row_data += [total_hours, total_income]
-            ws.append(row_data)
+                    # Если нет смены, то помечаем красным и ставим 0
+                    cell = ws.cell(row=current_row, column=current_date.day + 5)
+                    cell.fill = red_fill  # Красный
+                    cell.value = 0
+            else:
+                ws.cell(row=current_row, column=current_date.day + 5, value='')
 
-            # Apply inner border to each row
-            for cell in ws[row_number + 1]:
-                if cell.value == 0:
-                    cell.fill = red_fill  # Set red fill for cells with zero hours
+            current_date += timedelta(days=1)
+            total_hours += hours_worked
+            total_amount += day_amount
+        ws.cell(row=current_row, column=num_days + 6, value=total_hours)
+        ws.cell(row=current_row, column=num_days + 7, value=total_amount)
 
-            row_number += 1
+        current_row += 1
+        for car in cars_without_rentals:
+            ws.cell(row=current_row, column=2, value=car.name)
+            current_row += 1
 
-    # Identify cars with no shifts in the selected month
-    cars_with_shifts = [shift.rental.car for shift in Shift.objects.filter(date__range=(start_date, end_date))]
-    cars_without_shifts = [car for car in cars if car not in cars_with_shifts]
-
-    # Add rows for cars with no shifts
-    for car in cars_without_shifts:
-        row_data = [row_number, car.name, '', '']
-        for _ in range(num_days + 2):
-            row_data.append(0)
-        row_data += ['', '--']  # Add empty values for tariff and total price columns
-        ws.append(row_data)
-
-        # Apply red fill to cells
-        for cell in ws[row_number + 1]:
-            cell.fill = red_fill
-
-        row_number += 1
-
-    for column in ws.columns:
-        max_length = 0
-        column_name = get_column_letter(column[0].column)  # Get the column name (e.g., A, B, C)
-        for cell in column:
-            try:
-                if len(str(cell.value)) > max_length:
-                    max_length = len(cell.value)
-            except:
-                pass
-        adjusted_width = (max_length + 2) * 1.5  # Adjusting width with a little extra space
-        ws.column_dimensions[column_name].width = adjusted_width
+        for column in ws.columns:
+            column_name = get_column_letter(column[0].column)  # Получаем имя колонки (например, A, B, C)
+            max_length = max(len(str(cell.value)) for cell in column if cell.value is not None)
+            adjusted_width = (max_length + 2) * 1.2  # Расширяем колонку с небольшим запасом
+            ws.column_dimensions[column_name].width = adjusted_width
 
     response = HttpResponse(content_type='application/ms-excel')
-    response[
-        'Content-Disposition'] = f'attachment; filename=TCA_Report_{selected_date.strftime("%Y-%m")}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename=rental_table_{selected_date.strftime("%Y-%m")}.xlsx'
     wb.save(response)
 
     return response

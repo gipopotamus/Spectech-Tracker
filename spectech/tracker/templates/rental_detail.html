@@ -144,6 +144,7 @@
                 <th>Оператор</th>
                 <th>Расход топлива</th>
                 <th>Заправлено топлива</th>
+                <th>Режим работы</th>
               </tr>
             </thead>
             <tbody>
@@ -154,6 +155,13 @@
                   <td>{{ shift.worker }}</td>
                   <td>{{ shift.fuel_consumed }}</td>
                   <td>{{ shift.fuel_filled }}</td>
+                  <td>
+                      {% if shift.is_additional_mode %}
+                          {{ shift.rental.car.work_mode }}
+                      {% else %}
+                          Стандартный
+                      {% endif %}
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>
