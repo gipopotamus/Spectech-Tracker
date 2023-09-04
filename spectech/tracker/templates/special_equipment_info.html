@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Генерация отчета{% endblock %}
+
+{% block content %}
+<h1>Отчет по арендам</h1>
+<form method="POST" action="{% url 'special_equipment_info' %}">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="selected_month">Выберите месяц:</label>
+        <input type="month" id="selected_month" name="selected_month" value="{{ selected_month }}" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary">Загрузить подробный отчет</button>
+</form>
+{% endblock %}
