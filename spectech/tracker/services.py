@@ -168,6 +168,10 @@ def generate_excel(request, selected_date):
             cell.font = total_font
             cell.border = thin_border  # Тонкие границы для итоговых ячеек
 
+    for car in cars_without_rentals:
+        ws.cell(row=current_row, column=2, value=car.name)
+        current_row += 1
+
     for column in ws.columns:
         column_name = get_column_letter(column[0].column)  # Получаем имя колонки (например, A, B, C)
         max_length = max(len(str(cell.value)) for cell in column if cell.value is not None)
