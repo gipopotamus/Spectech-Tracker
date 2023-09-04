@@ -15,7 +15,6 @@ class Owner(models.Model):
     owner_type = models.CharField('Тип владельца', max_length=20)
     name = models.CharField('Наименование', max_length=20)
     inn = models.CharField('ИНН', max_length=20)
-    INN = models.CharField('ИНН', default=0)
 
     def __str__(self):
         return self.name
