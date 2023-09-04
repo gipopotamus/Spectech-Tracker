@@ -49,22 +49,34 @@ def generate_excel(request, selected_date):
     ws = wb.active
     ws.title = 'Special Equipment Report'
 
-    # Set font style
-    bold_font = Font(bold=True)
+    # Set font styles
+    header_font = Font(bold=True, size=14)
+    menu_font = Font(bold=True, size=14)
+    cell_font = Font(size=12)
+    total_font = Font(size=18)
 
     # Set fill styles
+    menu_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+
     green_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
     red_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
     blue_fill = PatternFill(start_color="BDD7EE", end_color="BDD7EE", fill_type="solid")
 
+    # Set border styles
+    thin_border = Border(left=Side(style="thin"), right=Side(style="thin"), top=Side(style="thin"), bottom=Side(style="thin"))
+    medium_border = Border(left=Side(style="medium"), right=Side(style="medium"), top=Side(style="medium"), bottom=Side(style="medium"))
+
     # Add headers with styles
-    headers = ['Номер', 'Техника', 'объект', 'Тариф', 'Доп. тариф']
+    headers = ['Номер', 'Техника', 'Объект', 'Тариф', 'Доп. тариф']
     for day in range(1, num_days + 1):
         headers.append(day)
     headers += ['количество часов', 'всего (р.)']
     ws.append(headers)
+
+    # Apply font styles and borders to header
     for cell in ws[1]:
-        cell.font = bold_font
+        cell.font = header_font
+        cell.border = thin_border
 
     # Получаем данные об арендах и сменах
     rentals = Rental.objects.filter(Q(start_date__lte=end_date) & Q(end_date__gte=start_date))
@@ -131,15 +143,36 @@ def generate_excel(request, selected_date):
         ws.cell(row=current_row, column=num_days + 7, value=total_amount)
 
         current_row += 1
-        for car in cars_without_rentals:
-            ws.cell(row=current_row, column=2, value=car.name)
-            current_row += 1
 
-        for column in ws.columns:
-            column_name = get_column_letter(column[0].column)  # Получаем имя колонки (например, A, B, C)
-            max_length = max(len(str(cell.value)) for cell in column if cell.value is not None)
-            adjusted_width = (max_length + 2) * 1.2  # Расширяем колонку с небольшим запасом
-            ws.column_dimensions[column_name].width = adjusted_width
+    # Примените стиль к строке с меню
+    menu_style = NamedStyle(name="menu_style")
+    menu_style.font = menu_font
+    menu_style.fill = menu_fill
+    menu_style.alignment = Alignment(horizontal="center", vertical="center")
+
+    menu_row = ws[1]
+    for cell in menu_row:
+        cell.style = menu_style
+        cell.border = medium_border  # Средняя граница для меню
+
+    # Примените стиль к данным ячеек
+    for row in ws.iter_rows(min_row=2, max_row=current_row - 1):
+        for cell in row:
+            cell.font = cell_font
+            cell.border = thin_border  # Тонкие границы для данных ячеек
+
+    # Примените стиль к столбцам с итоговыми часами и ценой
+    for col in range(num_days + 6, num_days + 8):
+        column_letter = get_column_letter(col)
+        for cell in ws[column_letter]:
+            cell.font = total_font
+            cell.border = thin_border  # Тонкие границы для итоговых ячеек
+
+    for column in ws.columns:
+        column_name = get_column_letter(column[0].column)  # Получаем имя колонки (например, A, B, C)
+        max_length = max(len(str(cell.value)) for cell in column if cell.value is not None)
+        adjusted_width = (max_length + 2) * 1.5  # Расширяем колонку с небольшим запасом
+        ws.column_dimensions[column_name].width = adjusted_width
 
     response = HttpResponse(content_type='application/ms-excel')
     response['Content-Disposition'] = f'attachment; filename=rental_table_{selected_date.strftime("%Y-%m")}.xlsx'
