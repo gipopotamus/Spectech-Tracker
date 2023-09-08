@@ -132,7 +132,7 @@ class BuildObjectAdmin(admin.ModelAdmin):
 
 
 class ShiftAdmin(admin.ModelAdmin):
-    list_display = ['worker', 'fuel_filled', 'fuel_consumed']
+    list_display = ['worker']
     # search_fields = ['date']
     autocomplete_fields = ['worker']
 
@@ -140,7 +140,7 @@ class ShiftAdmin(admin.ModelAdmin):
 class ShiftInline(admin.TabularInline):
     model = Shift
     extra = 0
-    readonly_fields = ['worker', 'fuel_filled', 'fuel_consumed', 'date', 'start_time', 'end_time']
+    readonly_fields = ['worker', 'date', 'start_time', 'end_time']
 
 
 class RentalAdmin(admin.ModelAdmin):

@@ -13,7 +13,7 @@
         <li><strong>Менеджер:</strong> {{ rental.manager.get_full_name }}</li>
         <li><strong>Дата начала:</strong> {{ rental.start_date }}</li>
         <li><strong>Дата конца:</strong> {{ rental.end_date }}</li>
-        <li><strong>Итоговая оплата:</strong> {{ total_salary }}</li>
+        <li><strong>Оплата за смены:</strong> {{ total_salary }}</li>
         <li><strong>Строительный объект:</strong> {{ rental.build_object }}</li>
         <li><strong>Цена в час:</strong> {{ rental.tariff }}</li>
         <li><strong>Цена для дополнительного режима работы :</strong> {{ rental.extra_tariff }}</li>
@@ -142,9 +142,8 @@
                 <th>Дата</th>
                 <th>Время</th>
                 <th>Оператор</th>
-                <th>Расход топлива</th>
-                <th>Заправлено топлива</th>
                 <th>Режим работы</th>
+                <th>Обед</th>
               </tr>
             </thead>
             <tbody>
@@ -153,13 +152,18 @@
                   <td>{{ shift.date }}</td>
                   <td>{{ shift.start_time}} - {{shift.end_time }}</td>
                   <td>{{ shift.worker }}</td>
-                  <td>{{ shift.fuel_consumed }}</td>
-                  <td>{{ shift.fuel_filled }}</td>
                   <td>
                       {% if shift.is_additional_mode %}
                           {{ shift.rental.car.work_mode }}
                       {% else %}
                           Стандартный
+                      {% endif %}
+                  </td>
+                  <td>
+                      {% if shift.dinner %}
+                          +
+                      {% else %}
+                          -
                       {% endif %}
                   </td>
                 </tr>

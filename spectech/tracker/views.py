@@ -1,7 +1,7 @@
 from django.contrib.auth import logout
 from django.db import models
 from django.contrib.auth.views import LoginView
-from django.db.models import Sum, F, ExpressionWrapper, FloatField
+from django.db.models import Sum, F, ExpressionWrapper, FloatField, When, Value, IntegerField, Case
 from django.db.models.functions import ExtractHour
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -15,6 +15,7 @@ from .forms import RentalForm, ShiftForm, DocumentForm
 from .models import Car, Rental, Shift, Client, BuildObject
 from datetime import timedelta
 from .services import generate_excel, CalendarService
+#TODO обновить календарь
 
 
 class RentalCalendarView(View):
@@ -93,11 +94,21 @@ class RentalDetailView(DetailView):
         rental = self.get_object()
         shifts = rental.shifts.annotate(
             total_hours=ExpressionWrapper(
-                ExtractHour(F('end_time') - F('start_time')),
+                ExtractHour(F('end_time') - F('start_time')) -
+                Case(
+                    When(dinner=True, then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                ),
                 output_field=FloatField()  # Используем FloatField для временной разницы
             ),
             total_payment=ExpressionWrapper(
-                ExtractHour(F('end_time') - F('start_time')) * F('worker__hourly_rate'),
+                (ExtractHour(F('end_time') - F('start_time')) -
+                 Case(
+                     When(dinner=True, then=Value(1)),
+                     default=Value(0),
+                     output_field=IntegerField(),
+                 )) * F('worker__hourly_rate'),
                 output_field=FloatField()  # Используем FloatField для оплаты смены
             )
         )

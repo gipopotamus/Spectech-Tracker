@@ -8,6 +8,9 @@ from django.contrib.contenttypes.models import ContentType
 from django_redis import get_redis_connection
 
 User = get_user_model()
+#TODO: поправить овнера
+#TODO: добавить свободный файл в загрузку
+#TODO: добавить несколько документов одного типа
 
 
 # Модель для хранения информации о владельце техники
@@ -234,13 +237,12 @@ class Rental(models.Model):
 # Модель для хранения информации о сменах
 class Shift(models.Model):
     worker = models.ForeignKey(Worker, verbose_name='Рабочий', on_delete=models.CASCADE)
-    fuel_filled = models.DecimalField('Заправленное топливо', max_digits=10, decimal_places=2)
-    fuel_consumed = models.DecimalField('Расход топлива', max_digits=10, decimal_places=2)
     date = models.DateField()  # Добавляем поле даты
     start_time = models.TimeField(verbose_name='Время начала')  # Поле времени начала
     end_time = models.TimeField(verbose_name='Время окончания')  # Поле времени окончания
     rental = models.ForeignKey(Rental, related_name='shifts', verbose_name='Аренда', on_delete=models.CASCADE)
     is_additional_mode = models.BooleanField('Дополнительный режим', default=False)
+    dinner = models.BooleanField('Обед', default=False)
 
     def __str__(self):
         return f"Смена {self.worker}"
