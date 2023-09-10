@@ -150,7 +150,7 @@
               {% for shift in shifts %}
                 <tr>
                   <td>{{ shift.date }}</td>
-                  <td>{{ shift.start_time}} - {{shift.end_time }}</td>
+                  <td>{{ shift.start_time}} - {{shift.end_time }} ({{ shift.total_hours }} часов)</td>
                   <td>{{ shift.worker }}</td>
                   <td>
                       {% if shift.is_additional_mode %}
