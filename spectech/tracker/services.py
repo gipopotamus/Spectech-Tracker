@@ -120,7 +120,10 @@ def generate_excel(request, selected_date):
                     for a in temp_shift:
                         start_time = a.start_time
                         end_time = a.end_time
-                        hours = (end_time.hour - start_time.hour) + (end_time.minute - start_time.minute) / 60
+                        if not a.dinner:
+                            hours = (end_time.hour - start_time.hour) + (end_time.minute - start_time.minute) / 60
+                        else:
+                            hours = (end_time.hour - start_time.hour) + (end_time.minute - start_time.minute) / 60 - 1
                         day_amount += hours * rental.extra_tariff if a.is_additional_mode else hours * rental.tariff
                         hours_worked += hours
                     if any(_.is_additional_mode for _ in temp_shift):
