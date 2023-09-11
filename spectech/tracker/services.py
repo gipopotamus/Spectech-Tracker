@@ -13,6 +13,9 @@ from .models import Rental, Car, Shift, BuildObject
 from .forms import DocumentForm
 import calendar
 
+#TODO: добавить свободный файл в загрузку
+#TODO: добавить несколько документов одного типа
+
 
 def upload_documents(request, pk):
     rental = get_object_or_404(Rental, pk=pk)
@@ -133,8 +136,8 @@ def generate_excel(request, selected_date):
                     cell = ws.cell(row=current_row, column=current_date.day + 5)
                     cell.fill = red_fill  # Красный
                     cell.value = 0
-            else:
-                ws.cell(row=current_row, column=current_date.day + 5, value='')
+            # else:
+            #     ws.cell(row=current_row, column=current_date.day + 5, value='')
 
             current_date += timedelta(days=1)
             total_hours += hours_worked
